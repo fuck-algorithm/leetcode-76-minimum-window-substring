@@ -1,30 +1,34 @@
 .app {
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .main {
   flex: 1;
-  padding: 0.5rem 1rem;
+  padding: 0.25rem 0.5rem;
   display: flex;
   overflow: hidden;
+  min-height: 0;
 }
 
 .container {
-  padding: 0.5rem;
+  padding: 0.25rem;
   margin: 0;
   width: 100%;
   max-width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.25rem;
+  overflow: hidden;
 }
 
 .title {
   text-align: center;
   color: white;
-  font-size: 1.5rem;
+  font-size: 1.1rem;
   margin: 0;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   font-weight: 600;
@@ -44,40 +48,43 @@
 /* 输入面板 */
 .input-panel {
   background: #1f2937;
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  padding: 0.3rem 0.5rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .input-group {
-  display: grid;
-  grid-template-columns: 2fr 1fr auto;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-  align-items: end;
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 0.25rem;
+  align-items: center;
 }
 
 .input-row {
   display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
+  align-items: center;
+  gap: 0.25rem;
+  flex: 1;
 }
 
 .input-row label {
   font-weight: 600;
   color: #e0e0e0;
-  font-size: 14px;
+  font-size: 12px;
+  white-space: nowrap;
 }
 
 .input-row input {
-  padding: 0.6rem;
-  border: 2px solid #374151;
-  border-radius: 6px;
-  font-size: 15px;
+  padding: 0.25rem 0.4rem;
+  border: 1px solid #374151;
+  border-radius: 4px;
+  font-size: 12px;
   transition: border-color 0.3s;
   background: #111827;
   color: #e0e0e0;
+  flex: 1;
+  min-width: 0;
 }
 
 .input-row input:focus {
@@ -86,16 +93,16 @@
 }
 
 .apply-btn {
-  padding: 0.6rem 1.5rem;
+  padding: 0.25rem 0.75rem;
   background: #f59e0b;
   color: #111827;
   border: none;
-  border-radius: 6px;
+  border-radius: 4px;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.3s;
   white-space: nowrap;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .apply-btn:hover {
@@ -127,18 +134,18 @@
 
 .preset-buttons {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.25rem;
   flex-wrap: wrap;
 }
 
 .preset-btn {
-  padding: 0.5rem 0.85rem;
+  padding: 0.2rem 0.5rem;
   background: #374151;
   border: 1px solid #4b5563;
-  border-radius: 6px;
+  border-radius: 4px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 500;
   color: #e0e0e0;
 }
@@ -163,66 +170,69 @@
 /* 主内容区域 - 两栏布局 */
 .main-content {
   display: grid;
-  grid-template-columns: 1.5fr 1fr;
-  gap: 0.75rem;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
   flex: 1;
   min-height: 0;
+  overflow: hidden;
 }
 
 .left-panel {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.4rem;
   min-height: 0;
+  overflow: hidden;
 }
 
 .right-panel {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  overflow: hidden;
 }
 
 /* 键盘快捷键提示 */
 .keyboard-hints {
   display: flex;
   justify-content: center;
-  gap: 1rem;
+  gap: 0.5rem;
   flex-wrap: wrap;
-  padding: 0.75rem;
+  padding: 0.25rem;
   background: rgba(31, 41, 55, 0.5);
-  border-radius: 8px;
+  border-radius: 4px;
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .hint-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 13px;
+  gap: 0.25rem;
+  font-size: 10px;
   color: #d1d5db;
 }
 
 .hint-item kbd {
   background: linear-gradient(135deg, #f59e0b, #ea580c);
   color: white;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 12px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 9px;
   font-weight: 600;
-  min-width: 32px;
+  min-width: 20px;
   text-align: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   font-family: inherit;
 }
 
 .footer {
   background: rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(10px);
-  padding: 0.6rem;
+  padding: 0.2rem;
   text-align: center;
   color: #9ca3af;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  font-size: 12px;
+  font-size: 10px;
 }
 
 /* 响应式设计 */

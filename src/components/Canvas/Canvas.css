@@ -1,10 +1,10 @@
 .canvas-container {
   flex: 1;
   background: #111827;
-  border-radius: 8px;
+  border-radius: 6px;
   position: relative;
   overflow: hidden;
-  min-height: 300px;
+  min-height: 160px;
 }
 
 .algorithm-canvas {
@@ -43,6 +43,6 @@
 
 @media (max-width: 768px) {
   .canvas-container {
-    min-height: 250px;
+    min-height: 180px;
   }
 }
