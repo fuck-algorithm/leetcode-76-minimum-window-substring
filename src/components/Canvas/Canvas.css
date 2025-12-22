@@ -1,0 +1,48 @@
+.canvas-container {
+  flex: 1;
+  background: #111827;
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+  min-height: 300px;
+}
+
+.algorithm-canvas {
+  display: block;
+  cursor: grab;
+}
+
+.algorithm-canvas:active {
+  cursor: grabbing;
+}
+
+.canvas-hint {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #9ca3af;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+/* D3 元素动画 */
+.char-group rect {
+  transition: fill 0.3s, stroke 0.3s;
+}
+
+.char-group text {
+  transition: fill 0.3s;
+}
+
+.pointer-left,
+.pointer-right {
+  transition: transform 0.3s ease-out;
+}
+
+@media (max-width: 768px) {
+  .canvas-container {
+    min-height: 250px;
+  }
+}

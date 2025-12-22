@@ -1,0 +1,212 @@
+.code-panel {
+  background: #1e1e1e;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  background: #252526;
+  border-bottom: 1px solid #3c3c3c;
+}
+
+.code-header h3 {
+  margin: 0;
+  font-size: 13px;
+  color: #e0e0e0;
+  font-weight: 600;
+}
+
+.language-tabs {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.lang-tab {
+  padding: 0.3rem 0.6rem;
+  background: transparent;
+  border: 1px solid transparent;
+  color: #9ca3af;
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.lang-tab:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e0e0e0;
+}
+
+.lang-tab.active {
+  background: #f59e0b;
+  color: #111827;
+  font-weight: 600;
+}
+
+.code-container {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+.code-lines {
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.code-line {
+  display: flex;
+  align-items: flex-start;
+  padding: 0 0.5rem;
+  transition: background 0.3s;
+  position: relative;
+  min-height: 20px;
+}
+
+.code-line.highlighted {
+  background: rgba(245, 158, 11, 0.2);
+  border-left: 3px solid #f59e0b;
+}
+
+.code-line.highlighted::before {
+  content: '→';
+  position: absolute;
+  left: 4px;
+  color: #f59e0b;
+  font-weight: bold;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.line-number {
+  min-width: 32px;
+  padding-right: 0.75rem;
+  color: #6b7280;
+  text-align: right;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.line-code {
+  margin: 0;
+  flex: 1;
+  white-space: pre;
+  color: #d4d4d4;
+}
+
+.line-code code {
+  font-family: inherit;
+}
+
+.var-annotation {
+  margin-left: 1rem;
+  flex-shrink: 0;
+}
+
+.var-value {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+  font-size: 11px;
+  font-family: 'Consolas', 'Monaco', monospace;
+  white-space: nowrap;
+}
+
+/* Prism 主题覆盖 */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: #6a9955;
+}
+
+.token.punctuation {
+  color: #d4d4d4;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+  color: #b5cea8;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+  color: #ce9178;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+  color: #d4d4d4;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+  color: #569cd6;
+}
+
+.token.function,
+.token.class-name {
+  color: #dcdcaa;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+  color: #d16969;
+}
+
+/* 滚动条样式 */
+.code-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.code-container::-webkit-scrollbar-track {
+  background: #1e1e1e;
+}
+
+.code-container::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border-radius: 4px;
+}
+
+.code-container::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+@media (max-width: 1024px) {
+  .code-panel {
+    max-height: 300px;
+  }
+  
+  .code-lines {
+    font-size: 11px;
+  }
+}
