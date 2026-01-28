@@ -152,16 +152,6 @@ const App: React.FC = () => {
 
       <main className="main">
         <div className="container">
-          <h1 className="title">
-            <a 
-              href="https://leetcode.cn/problems/minimum-window-substring/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-            >
-              76. 最小覆盖子串
-            </a>
-          </h1>
-
           <div className="input-panel">
             <div className="input-group">
               <div className="input-row">

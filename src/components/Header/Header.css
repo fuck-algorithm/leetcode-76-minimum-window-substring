@@ -19,6 +19,7 @@
   font-weight: 500;
   transition: opacity 0.3s;
   font-size: 12px;
+  flex-shrink: 0;
 }
 
 .back-link:hover {
@@ -28,6 +29,32 @@
 .back-link svg {
   width: 16px;
   height: 16px;
+}
+
+.header-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+}
+
+.header-title a {
+  color: white;
+  text-decoration: none;
+  transition: opacity 0.3s;
+}
+
+.header-title a:hover {
+  opacity: 0.8;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .header-actions {
@@ -110,10 +137,16 @@
     padding: 0.5rem;
   }
   
-  .header-actions {
-    order: 3;
+  .header-title {
+    position: static;
+    transform: none;
+    order: -1;
     width: 100%;
-    justify-content: center;
+    text-align: center;
+  }
+  
+  .header-right {
+    order: 3;
   }
   
   .header-btn span:not(.icon) {
