@@ -42,6 +42,56 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
     const startX = (width - s.length * charWidth) / 2;
     const stringY = 50;
 
+    // 绘制图例
+    const legendY = stringY - 35;
+    const legendItemWidth = 100;
+    const legendStartX = (width - legendItemWidth * 3) / 2;
+    
+    // 图例1: 当前窗口
+    svg.append('rect')
+      .attr('x', legendStartX)
+      .attr('y', legendY - 8)
+      .attr('width', 16)
+      .attr('height', 12)
+      .attr('rx', 2)
+      .attr('fill', '#f59e0b');
+    svg.append('text')
+      .attr('x', legendStartX + 20)
+      .attr('y', legendY)
+      .attr('fill', '#e0e0e0')
+      .attr('font-size', '10px')
+      .text('当前窗口');
+    
+    // 图例2: 最优解
+    svg.append('rect')
+      .attr('x', legendStartX + legendItemWidth)
+      .attr('y', legendY - 8)
+      .attr('width', 16)
+      .attr('height', 12)
+      .attr('rx', 2)
+      .attr('fill', '#10b981');
+    svg.append('text')
+      .attr('x', legendStartX + legendItemWidth + 20)
+      .attr('y', legendY)
+      .attr('fill', '#e0e0e0')
+      .attr('font-size', '10px')
+      .text('当前最优解');
+    
+    // 图例3: 窗口外字符
+    svg.append('rect')
+      .attr('x', legendStartX + legendItemWidth * 2)
+      .attr('y', legendY - 8)
+      .attr('width', 16)
+      .attr('height', 12)
+      .attr('rx', 2)
+      .attr('fill', '#374151');
+    svg.append('text')
+      .attr('x', legendStartX + legendItemWidth * 2 + 20)
+      .attr('y', legendY)
+      .attr('fill', '#e0e0e0')
+      .attr('font-size', '10px')
+      .text('窗口外');
+
     // 创建主容器
     const g = svg.append('g')
       .attr('class', 'main-group')
@@ -99,7 +149,7 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
       .attr('height', charHeight)
       .attr('rx', 6)
       .attr('fill', (_, i) => {
-        if (minStart >= 0 && i >= minStart && i < minStart + minLen) {
+        if (minStart >= 0 && minLen !== Infinity && i >= minStart && i < minStart + minLen) {
           return '#10b981';
         }
         if (i >= left && i < right) {
@@ -108,7 +158,7 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
         return '#374151';
       })
       .attr('stroke', (_, i) => {
-        if (minStart >= 0 && i >= minStart && i < minStart + minLen) {
+        if (minStart >= 0 && minLen !== Infinity && i >= minStart && i < minStart + minLen) {
           return '#059669';
         }
         if (i >= left && i < right) {
@@ -123,7 +173,7 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
       .attr('y', charHeight / 2 + 4)
       .attr('text-anchor', 'middle')
       .attr('fill', (_, i) => {
-        if ((minStart >= 0 && i >= minStart && i < minStart + minLen) || 
+        if ((minStart >= 0 && minLen !== Infinity && i >= minStart && i < minStart + minLen) || 
             (i >= left && i < right)) {
           return '#111827';
         }
@@ -192,6 +242,37 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
             .text('R');
         });
     }
+
+    // 计算窗口是否满足条件
+    const isWindowValid = currentStep.valid === currentStep.need.size && currentStep.need.size > 0;
+    
+    // 绘制窗口状态徽章
+    const statusY = stringY + charHeight + 30;
+    const statusText = isWindowValid ? '窗口满足条件 ✓' : '窗口不满足条件 ✗';
+    const statusColor = isWindowValid ? '#10b981' : '#ef4444';
+    const statusBgColor = isWindowValid ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)';
+    
+    const statusWidth = statusText.length * 12 + 20;
+    const statusX = (width - statusWidth) / 2;
+    
+    g.append('rect')
+      .attr('x', statusX)
+      .attr('y', statusY - 12)
+      .attr('width', statusWidth)
+      .attr('height', 22)
+      .attr('rx', 11)
+      .attr('fill', statusBgColor)
+      .attr('stroke', statusColor)
+      .attr('stroke-width', 2);
+    
+    g.append('text')
+      .attr('x', width / 2)
+      .attr('y', statusY + 3)
+      .attr('text-anchor', 'middle')
+      .attr('fill', statusColor)
+      .attr('font-size', '11px')
+      .attr('font-weight', '600')
+      .text(statusText);
 
     // 绘制目标字符串
     const targetY = stringY + charHeight + 55;

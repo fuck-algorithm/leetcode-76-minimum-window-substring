@@ -1,4 +1,4 @@
-export type CodeLanguage = 'javascript' | 'python' | 'java' | 'golang';
+export type CodeLanguage = 'java' | 'javascript' | 'python' | 'golang';
 
 export interface CodeLine {
   lineNumber: number;
@@ -284,8 +284,8 @@ export const algorithmCodes: Record<CodeLanguage, AlgorithmCode> = {
 };
 
 export const languageOptions: { value: CodeLanguage; label: string }[] = [
+  { value: 'java', label: 'Java' },
   { value: 'javascript', label: 'JavaScript' },
   { value: 'python', label: 'Python' },
-  { value: 'java', label: 'Java' },
   { value: 'golang', label: 'Go' },
 ];

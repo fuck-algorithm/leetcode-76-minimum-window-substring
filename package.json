@@ -4,8 +4,10 @@
   "description": "LeetCode 76 - 最小覆盖子串 算法可视化",
   "scripts": {
     "dev": "vite",
+    "dev:background": "nohup vite --host 127.0.0.1 --port 48844 > logs/server.log 2>&1 &",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "stop": "lsof -ti:48844 | xargs kill -9 2>/dev/null || true"
   },
   "dependencies": {
     "@types/d3": "^7.4.3",
@@ -21,6 +23,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.7.0",
+    "pm2": "^6.0.14",
     "vite": "^5.0.0"
   }
 }

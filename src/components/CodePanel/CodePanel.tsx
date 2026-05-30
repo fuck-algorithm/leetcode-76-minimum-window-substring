@@ -14,7 +14,7 @@ interface CodePanelProps {
 }
 
 const CodePanel: React.FC<CodePanelProps> = ({ currentStep }) => {
-  const [language, setLanguage] = useState<CodeLanguage>('javascript');
+  const [language, setLanguage] = useState<CodeLanguage>('java');
 
   useEffect(() => {
     getCodeLanguage().then((lang) => {
