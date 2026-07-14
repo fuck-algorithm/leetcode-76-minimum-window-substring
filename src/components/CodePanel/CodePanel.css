@@ -113,21 +113,6 @@
   font-family: inherit;
 }
 
-.var-annotation {
-  margin-left: 0.5rem;
-  flex-shrink: 0;
-}
-
-.var-value {
-  background: rgba(16, 185, 129, 0.2);
-  color: #10b981;
-  padding: 0.05rem 0.3rem;
-  border-radius: 2px;
-  font-size: 10px;
-  font-family: 'Consolas', 'Monaco', monospace;
-  white-space: nowrap;
-}
-
 /* 变量状态面板 */
 .variables-panel {
   background: #1a1a1a;

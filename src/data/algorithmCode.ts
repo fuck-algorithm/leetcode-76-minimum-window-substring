@@ -254,7 +254,7 @@ const jsStepToRelatedLines: Record<string, number[]> = {
   expand: [13, 14, 15, 16, 18, 19, 20, 21, 22, 23],
   found: [27, 28, 29, 30],
   shrink: [33, 34, 35, 37, 38, 39, 40, 41],
-  complete: [46],
+  complete: [48],
 };
 
 const pyStepToRelatedLines: Record<string, number[]> = {
@@ -262,7 +262,7 @@ const pyStepToRelatedLines: Record<string, number[]> = {
   expand: [12, 13, 14, 15, 17, 18, 19, 20],
   found: [24, 25, 26],
   shrink: [29, 30, 31, 33, 34, 35, 36],
-  complete: [38],
+  complete: [42],
 };
 
 const javaStepToRelatedLines: Record<string, number[]> = {
@@ -270,7 +270,7 @@ const javaStepToRelatedLines: Record<string, number[]> = {
   expand: [13, 14, 15, 16, 18, 19, 20, 21, 22],
   found: [26, 27, 28, 29],
   shrink: [32, 33, 34, 36, 37, 38, 39, 40],
-  complete: [44],
+  complete: [48],
 };
 
 const goStepToRelatedLines: Record<string, number[]> = {
@@ -278,7 +278,7 @@ const goStepToRelatedLines: Record<string, number[]> = {
   expand: [13, 14, 15, 16, 18, 19, 20, 21, 22],
   found: [26, 27, 28, 29],
   shrink: [32, 33, 34, 36, 37, 38, 39, 40],
-  complete: [44, 45, 46],
+  complete: [49, 50, 51],
 };
 
 const parseCodeLines = (code: string): CodeLine[] => {
