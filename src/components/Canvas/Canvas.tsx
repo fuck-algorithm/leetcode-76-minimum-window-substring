@@ -45,7 +45,7 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
     // scale 让整体布局随画布高度自适应（矮画布压缩间距，高画布展开）
     const contentHeight = 340; // 各区块自然总高度基准
     const topPad = 12;
-    const scale = Math.min(1, Math.max(0.7, (height - topPad * 2) / contentHeight));
+    const scale = Math.min(1, Math.max(0.85, (height - topPad * 2) / contentHeight));
     const gap = (base: number) => base * scale;
 
     // 区块 1：图例（占 1 行高度）
@@ -71,8 +71,8 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
     // 区块 6：频次对比
     const freqY = targetY + gap(25);
 
-    // 区块 7：步骤说明（位于频次对比下方）
-    const descY = freqY + gap(62);
+    // 区块 7：步骤说明（位于频次对比下方，间距需覆盖频次区块 ~52px 纵深）
+    const descY = freqY + gap(82);
 
     // 绘制图例
     svg.append('rect')
@@ -239,7 +239,7 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
           .attr('font-weight', '700')
           .text('L');
         g.append('path')
-          .attr('d', `M0,${6} L-5,${14} L5,${14} Z`)
+          .attr('d', 'M0,6 L-5,14 L5,14 Z')
           .attr('fill', '#f59e0b');
       });
 

@@ -43,6 +43,6 @@
 
 @media (max-width: 768px) {
   .canvas-container {
-    min-height: 180px;
+    min-height: 240px;
   }
 }
