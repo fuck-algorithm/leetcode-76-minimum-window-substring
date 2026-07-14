@@ -1,11 +1,16 @@
 .control-panel {
   background: #111827;
   border-radius: 6px;
-  padding: 0.3rem;
+  padding: 0.3rem 0.5rem;
   display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
   flex-shrink: 0;
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .control-buttons {
@@ -148,7 +153,8 @@
   border-radius: 7px;
   cursor: pointer;
   overflow: visible;
-  margin-top: 0.2rem;
+  flex: 1;
+  min-width: 120px;
 }
 
 .progress-bar-fill {

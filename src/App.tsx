@@ -197,37 +197,38 @@ const App: React.FC = () => {
           <div className="main-content">
             <div className="left-panel">
               <Canvas s={s} t={t} currentStep={currentStepData} />
-              <ControlPanel
-                currentStep={currentStep}
-                totalSteps={steps.length}
-                isPlaying={isPlaying}
-                onPlay={() => setIsPlaying(true)}
-                onPause={() => setIsPlaying(false)}
-                onPrev={() => {
-                  if (currentStep > 0) {
-                    setCurrentStep(prev => prev - 1);
-                    setIsPlaying(false);
-                  }
-                }}
-                onNext={() => {
-                  if (currentStep < steps.length - 1) {
-                    setCurrentStep(prev => prev + 1);
-                  }
-                }}
-                onReset={() => {
-                  setCurrentStep(0);
-                  setIsPlaying(false);
-                }}
-                onSeek={setCurrentStep}
-                speed={speed}
-                onSpeedChange={setSpeed}
-              />
             </div>
-            
+
             <div className="right-panel">
               <CodePanel currentStep={currentStepData} />
             </div>
           </div>
+
+          <ControlPanel
+            currentStep={currentStep}
+            totalSteps={steps.length}
+            isPlaying={isPlaying}
+            onPlay={() => setIsPlaying(true)}
+            onPause={() => setIsPlaying(false)}
+            onPrev={() => {
+              if (currentStep > 0) {
+                setCurrentStep(prev => prev - 1);
+                setIsPlaying(false);
+              }
+            }}
+            onNext={() => {
+              if (currentStep < steps.length - 1) {
+                setCurrentStep(prev => prev + 1);
+              }
+            }}
+            onReset={() => {
+              setCurrentStep(0);
+              setIsPlaying(false);
+            }}
+            onSeek={setCurrentStep}
+            speed={speed}
+            onSpeedChange={setSpeed}
+          />
 
           <div className="keyboard-hints">
             <div className="hint-item">
