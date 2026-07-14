@@ -40,14 +40,41 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
     const charWidth = Math.min(32, (width - 80) / s.length);
     const charHeight = 32;
     const startX = (width - s.length * charWidth) / 2;
-    const stringY = 50;
 
-    // 绘制图例
-    const legendY = stringY - 35;
+    // 垂直布局：从顶部 padding 开始，按区块累加 y 坐标，消除重叠
+    // scale 让整体布局随画布高度自适应（矮画布压缩间距，高画布展开）
+    const contentHeight = 340; // 各区块自然总高度基准
+    const topPad = 12;
+    const scale = Math.min(1, Math.max(0.7, (height - topPad * 2) / contentHeight));
+    const gap = (base: number) => base * scale;
+
+    // 区块 1：图例（占 1 行高度）
+    const legendBlockH = gap(20);
+    const legendY = topPad + 10;
     const legendItemWidth = 100;
     const legendStartX = (width - legendItemWidth * 3) / 2;
-    
-    // 图例1: 当前窗口
+
+    // 区块 2：源字符串标题
+    const titleY = legendY + legendBlockH + gap(8);
+
+    // 区块 3：字符行 + 指针（左指针在上方，右指针在下方）
+    const stringY = titleY + gap(20);
+    const leftPointerTopY = stringY - gap(24); // 左指针标签，独立于字符行上方
+    const rightPointerBottomY = stringY + charHeight + gap(22); // 右指针标签，独立于字符行下方
+
+    // 区块 4：窗口状态徽章
+    const statusY = rightPointerBottomY + gap(18);
+
+    // 区块 5：目标字符串
+    const targetY = statusY + gap(22);
+
+    // 区块 6：频次对比
+    const freqY = targetY + gap(25);
+
+    // 区块 7：步骤说明（位于频次对比下方）
+    const descY = freqY + gap(62);
+
+    // 绘制图例
     svg.append('rect')
       .attr('x', legendStartX)
       .attr('y', legendY - 8)
@@ -100,7 +127,7 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
     // 绘制标题
     g.append('text')
       .attr('x', width / 2)
-      .attr('y', 20)
+      .attr('y', titleY)
       .attr('text-anchor', 'middle')
       .attr('fill', '#e0e0e0')
       .attr('font-size', '12px')
@@ -192,11 +219,10 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
       .attr('font-size', '9px')
       .text((_, i) => i.toString());
 
-    // 绘制左指针
-    const pointerY = stringY - 22;
+    // 绘制左指针（位于字符行上方独立区域）
     g.append('g')
       .attr('class', 'pointer-left')
-      .attr('transform', `translate(${startX + left * charWidth + (charWidth - 4) / 2}, ${pointerY})`)
+      .attr('transform', `translate(${startX + left * charWidth + (charWidth - 4) / 2}, ${leftPointerTopY})`)
       .call(g => {
         g.append('rect')
           .attr('x', -12)
@@ -213,15 +239,15 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
           .attr('font-weight', '700')
           .text('L');
         g.append('path')
-          .attr('d', 'M0,6 L-5,14 L5,14 Z')
+          .attr('d', `M0,${6} L-5,${14} L5,${14} Z`)
           .attr('fill', '#f59e0b');
       });
 
-    // 绘制右指针
+    // 绘制右指针（位于字符行下方独立区域）
     if (right > 0) {
       g.append('g')
         .attr('class', 'pointer-right')
-        .attr('transform', `translate(${startX + (right - 1) * charWidth + (charWidth - 4) / 2}, ${stringY + charHeight + 25})`)
+        .attr('transform', `translate(${startX + (right - 1) * charWidth + (charWidth - 4) / 2}, ${rightPointerBottomY})`)
         .call(g => {
           g.append('path')
             .attr('d', 'M0,-6 L-5,-14 L5,-14 Z')
@@ -247,7 +273,6 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
     const isWindowValid = currentStep.valid === currentStep.need.size && currentStep.need.size > 0;
     
     // 绘制窗口状态徽章
-    const statusY = stringY + charHeight + 30;
     const statusText = isWindowValid ? '窗口满足条件 ✓' : '窗口不满足条件 ✗';
     const statusColor = isWindowValid ? '#10b981' : '#ef4444';
     const statusBgColor = isWindowValid ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)';
@@ -275,7 +300,6 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
       .text(statusText);
 
     // 绘制目标字符串
-    const targetY = stringY + charHeight + 55;
     g.append('text')
       .attr('x', width / 2)
       .attr('y', targetY)
@@ -286,7 +310,6 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
       .text(`目标字符串 t = "${t}"`);
 
     // 绘制字符频次对比
-    const freqY = targetY + 25;
     const needMap = currentStep.need;
     const windowMap = currentStep.window;
     const chars = Array.from(needMap.keys()).sort();
@@ -359,7 +382,6 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
     });
 
     // 绘制步骤说明
-    const descY = freqY + 70;
     const descText = currentStep.description;
     
     g.append('rect')
