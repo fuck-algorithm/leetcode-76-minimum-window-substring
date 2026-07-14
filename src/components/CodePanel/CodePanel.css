@@ -128,6 +128,85 @@
   white-space: nowrap;
 }
 
+/* 变量状态面板 */
+.variables-panel {
+  background: #1a1a1a;
+  border-bottom: 1px solid #3c3c3c;
+  padding: 0.3rem 0.5rem;
+  flex-shrink: 0;
+}
+
+.variables-panel-title {
+  font-size: 10px;
+  color: #9ca3af;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+}
+
+.variables-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+  margin-bottom: 0.25rem;
+}
+
+.var-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  background: #2d2d2d;
+  border: 1px solid #3c3c3c;
+  border-radius: 3px;
+  padding: 0.05rem 0.3rem;
+  font-size: 10px;
+  font-family: 'Consolas', 'Monaco', monospace;
+}
+
+.var-chip .var-key {
+  color: #9ca3af;
+}
+
+.var-chip .var-val {
+  color: #fbbf24;
+  font-weight: 600;
+}
+
+.var-map-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.var-map {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 10px;
+}
+
+.var-map .var-key {
+  color: #9ca3af;
+  font-size: 10px;
+}
+
+.var-map code {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 0.05rem 0.3rem;
+  border-radius: 2px;
+  font-family: 'Consolas', 'Monaco', monospace;
+}
+
+/* 相关行淡色提示（非当前执行行） */
+.code-line.related {
+  background: rgba(96, 165, 250, 0.06);
+  border-left: 2px solid rgba(96, 165, 250, 0.25);
+}
+
+.code-line.related::before {
+  content: '';
+}
+
 /* Prism 主题覆盖 */
 .token.comment,
 .token.prolog,

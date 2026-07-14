@@ -12,6 +12,7 @@ export interface AlgorithmStep {
   result?: string;
   // 变量状态，用于代码调试显示
   variables: {
+    type: string;
     left: number;
     right: number;
     valid: number;
@@ -52,6 +53,7 @@ export function generateMinWindowSteps(s: string, t: string): AlgorithmStep[] {
   };
 
   const createVariables = (currentChar?: string) => ({
+    type: '', // 由调用处覆盖
     left,
     right,
     valid,
@@ -72,7 +74,7 @@ export function generateMinWindowSteps(s: string, t: string): AlgorithmStep[] {
     minLen: Infinity,
     description: `📋 初始化：统计目标字符串 "${t}" 中每个字符的频次。需要找到 s 中包含这些字符的最短子串。`,
     need: new Map(need),
-    variables: createVariables(),
+    variables: { ...createVariables(), type: 'init' },
   });
 
   while (right < s.length) {
@@ -110,7 +112,7 @@ export function generateMinWindowSteps(s: string, t: string): AlgorithmStep[] {
       minLen,
       currentChar: c,
       description: expandDesc,
-      variables: createVariables(c),
+      variables: { ...createVariables(c), type: 'expand' },
     });
 
     while (valid === need.size) {
@@ -127,7 +129,7 @@ export function generateMinWindowSteps(s: string, t: string): AlgorithmStep[] {
           minStart: start,
           minLen,
           description: `🎉 找到覆盖子串："${s.substring(start, start + minLen)}"（位置 ${start}~${start + minLen - 1}），长度 ${minLen}！尝试缩小窗口。`,
-          variables: createVariables(),
+          variables: { ...createVariables(), type: 'found' },
         });
       }
 
@@ -162,7 +164,7 @@ export function generateMinWindowSteps(s: string, t: string): AlgorithmStep[] {
         minLen,
         currentChar: d,
         description: shrinkDesc,
-        variables: createVariables(d),
+        variables: { ...createVariables(d), type: 'shrink' },
       });
     }
   }
@@ -178,9 +180,9 @@ export function generateMinWindowSteps(s: string, t: string): AlgorithmStep[] {
     minLen,
     result: minLen === Infinity ? '' : s.substring(start, start + minLen),
     description: minLen === Infinity 
-      ? `❌ 算法结束：未找到包含所有目标字符的子串。` 
+      ? `❌ 算法结束：未找到包含所有目标字符的子串。`
       : `✅ 完成！最小覆盖子串："${s.substring(start, start + minLen)}"，位置 ${start}~${start + minLen - 1}，长度 ${minLen}。`,
-    variables: createVariables(),
+    variables: { ...createVariables(), type: 'complete' },
   });
 
   return steps;

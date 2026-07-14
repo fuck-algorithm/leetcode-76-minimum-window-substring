@@ -13,6 +13,14 @@ interface CodePanelProps {
   currentStep: AlgorithmStep | null;
 }
 
+const STEP_LABELS: Record<string, string> = {
+  init: '初始化',
+  expand: '扩张窗口',
+  found: '找到覆盖',
+  shrink: '收缩窗口',
+  complete: '完成',
+};
+
 const CodePanel: React.FC<CodePanelProps> = ({ currentStep }) => {
   const [language, setLanguage] = useState<CodeLanguage>('java');
 
@@ -34,9 +42,11 @@ const CodePanel: React.FC<CodePanelProps> = ({ currentStep }) => {
   };
 
   const codeData = algorithmCodes[language];
-  const highlightedLines = currentStep 
-    ? codeData.stepToLines[currentStep.type] || []
-    : [];
+  const stepType = currentStep?.type ?? '';
+  // 当前执行行：单行高亮
+  const activeLine = currentStep ? codeData.stepToActiveLine[stepType] : undefined;
+  // 相关行区间：淡色提示
+  const relatedLines = currentStep ? codeData.stepToRelatedLines[stepType] || [] : [];
 
   const getPrismLanguage = (lang: CodeLanguage): string => {
     const map: Record<CodeLanguage, string> = {
@@ -48,31 +58,15 @@ const CodePanel: React.FC<CodePanelProps> = ({ currentStep }) => {
     return map[lang];
   };
 
-  const renderVariableValue = (lineNumber: number): React.ReactNode => {
-    if (!currentStep) return null;
-    
-    const vars = currentStep.variables;
-    const line = codeData.lines[lineNumber - 1]?.code || '';
-    
-    // 根据代码行内容显示相关变量值
-    if (line.includes('left') && line.includes('right') && line.includes('=')) {
-      return <span className="var-value">left={vars.left}, right={vars.right}</span>;
+  // 滚动到当前 active 行
+  useEffect(() => {
+    if (activeLine !== undefined) {
+      const el = document.querySelector(`.code-line[data-line="${activeLine}"]`);
+      el?.scrollIntoView({ block: 'center', behavior: 'smooth' });
     }
-    if (line.includes('valid') && line.includes('=') && !line.includes('==')) {
-      return <span className="var-value">valid={vars.valid}</span>;
-    }
-    if (line.includes('minLen') || line.includes('min_len')) {
-      return <span className="var-value">minLen={vars.minLen}</span>;
-    }
-    if (line.includes('start') && line.includes('=') && !line.includes('==')) {
-      return <span className="var-value">start={vars.start}</span>;
-    }
-    if (line.includes('window') && line.includes('=') && vars.windowStr !== '{}') {
-      return <span className="var-value">window={vars.windowStr}</span>;
-    }
-    
-    return null;
-  };
+  }, [activeLine, language]);
+
+  const vars = currentStep?.variables;
 
   return (
     <div className="code-panel">
@@ -90,22 +84,45 @@ const CodePanel: React.FC<CodePanelProps> = ({ currentStep }) => {
           ))}
         </div>
       </div>
-      
+
+      {vars && (
+        <div className="variables-panel">
+          <div className="variables-panel-title">
+            变量状态{stepType ? ` · ${STEP_LABELS[stepType] ?? stepType}` : ''}
+          </div>
+          <div className="variables-grid">
+            <div className="var-chip"><span className="var-key">left</span><span className="var-val">{vars.left}</span></div>
+            <div className="var-chip"><span className="var-key">right</span><span className="var-val">{vars.right}</span></div>
+            <div className="var-chip"><span className="var-key">valid</span><span className="var-val">{vars.valid}</span></div>
+            <div className="var-chip"><span className="var-key">start</span><span className="var-val">{vars.start}</span></div>
+            <div className="var-chip"><span className="var-key">minLen</span><span className="var-val">{String(vars.minLen)}</span></div>
+            {vars.currentChar && (
+              <div className="var-chip"><span className="var-key">当前字符</span><span className="var-val">{vars.currentChar}</span></div>
+            )}
+          </div>
+          <div className="var-map-row">
+            <div className="var-map"><span className="var-key">window</span><code>{vars.windowStr}</code></div>
+            <div className="var-map"><span className="var-key">need</span><code>{vars.needStr}</code></div>
+          </div>
+        </div>
+      )}
+
       <div className="code-container">
         <div className="code-lines">
           {codeData.lines.map((line, index) => {
             const lineNum = index + 1;
-            const isHighlighted = highlightedLines.includes(lineNum);
-            const varValue = renderVariableValue(lineNum);
-            
+            const isActive = activeLine === lineNum;
+            const isRelated = !isActive && relatedLines.includes(lineNum);
+
             return (
-              <div 
-                key={lineNum} 
-                className={`code-line ${isHighlighted ? 'highlighted' : ''}`}
+              <div
+                key={lineNum}
+                data-line={lineNum}
+                className={`code-line ${isActive ? 'highlighted' : ''} ${isRelated ? 'related' : ''}`}
               >
                 <span className="line-number">{lineNum}</span>
                 <pre className="line-code">
-                  <code 
+                  <code
                     className={`language-${getPrismLanguage(language)}`}
                     dangerouslySetInnerHTML={{
                       __html: Prism.highlight(
@@ -116,7 +133,6 @@ const CodePanel: React.FC<CodePanelProps> = ({ currentStep }) => {
                     }}
                   />
                 </pre>
-                {varValue && <div className="var-annotation">{varValue}</div>}
               </div>
             );
           })}

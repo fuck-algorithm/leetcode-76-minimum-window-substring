@@ -12,8 +12,10 @@ export interface AlgorithmCode {
   displayName: string;
   code: string;
   lines: CodeLine[];
-  // 步骤类型到行号的映射
-  stepToLines: Record<string, number[]>;
+  // 步骤类型到"当前执行行"的映射（单行，用于 Debug 高亮）
+  stepToActiveLine: Record<string, number>;
+  // 步骤类型到"相关代码行区间"的映射（多行，用于淡色提示）
+  stepToRelatedLines: Record<string, number[]>;
 }
 
 const javascriptCode = `function minWindow(s, t) {
@@ -212,8 +214,42 @@ const golangCode = `func minWindow(s string, t string) string {
     return s[start : start+minLen]
 }`;
 
-// 步骤类型到代码行的映射
-const jsStepToLines: Record<string, number[]> = {
+// 步骤类型到"当前执行行"（单行）的映射 —— Debug 高亮这一行
+// 行号已逐一对照源码字符串逐行核对（语义核心行），与源码实际内容一致。
+const jsStepToActiveLine: Record<string, number> = {
+  init: 1,       // function minWindow(s, t) {
+  expand: 16,    // const c = s[right];
+  found: 30,     // if (right - left < minLen) {
+  shrink: 36,    // const d = s[left];
+  complete: 48,  // return minLen === Infinity ? "" : s.substring(start, start + minLen);
+};
+
+const pyStepToActiveLine: Record<string, number> = {
+  init: 1,       // def minWindow(s: str, t: str) -> str:
+  expand: 17,    // c = s[right]
+  found: 29,     // if right - left < min_len:
+  shrink: 34,    // d = s[left]
+  complete: 42,  // return "" if min_len == float('inf') else s[start:start + min_len]
+};
+
+const javaStepToActiveLine: Record<string, number> = {
+  init: 1,       // public String minWindow(String s, String t) {
+  expand: 16,    // char c = s.charAt(right);
+  found: 30,     // if (right - left < minLen) {
+  shrink: 36,    // char d = s.charAt(left);
+  complete: 48,  // return minLen == Integer.MAX_VALUE ? "" : s.substring(start, start + minLen);
+};
+
+const goStepToActiveLine: Record<string, number> = {
+  init: 1,       // func minWindow(s string, t string) string {
+  expand: 16,    // c := s[right]
+  found: 30,     // if right-left < minLen {
+  shrink: 36,    // d := s[left]
+  complete: 51,  // return s[start : start+minLen]
+};
+
+// 步骤类型到"相关代码行区间"的映射 —— 淡色提示整段（保留原多行映射）
+const jsStepToRelatedLines: Record<string, number[]> = {
   init: [1, 2, 3, 5, 6, 7, 9, 10, 11],
   expand: [13, 14, 15, 16, 18, 19, 20, 21, 22, 23],
   found: [27, 28, 29, 30],
@@ -221,7 +257,7 @@ const jsStepToLines: Record<string, number[]> = {
   complete: [46],
 };
 
-const pyStepToLines: Record<string, number[]> = {
+const pyStepToRelatedLines: Record<string, number[]> = {
   init: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
   expand: [12, 13, 14, 15, 17, 18, 19, 20],
   found: [24, 25, 26],
@@ -229,7 +265,7 @@ const pyStepToLines: Record<string, number[]> = {
   complete: [38],
 };
 
-const javaStepToLines: Record<string, number[]> = {
+const javaStepToRelatedLines: Record<string, number[]> = {
   init: [1, 2, 3, 5, 6, 7, 9, 10, 11],
   expand: [13, 14, 15, 16, 18, 19, 20, 21, 22],
   found: [26, 27, 28, 29],
@@ -237,7 +273,7 @@ const javaStepToLines: Record<string, number[]> = {
   complete: [44],
 };
 
-const goStepToLines: Record<string, number[]> = {
+const goStepToRelatedLines: Record<string, number[]> = {
   init: [1, 2, 3, 5, 6, 7, 9, 10, 11],
   expand: [13, 14, 15, 16, 18, 19, 20, 21, 22],
   found: [26, 27, 28, 29],
@@ -258,28 +294,32 @@ export const algorithmCodes: Record<CodeLanguage, AlgorithmCode> = {
     displayName: 'JavaScript',
     code: javascriptCode,
     lines: parseCodeLines(javascriptCode),
-    stepToLines: jsStepToLines,
+    stepToActiveLine: jsStepToActiveLine,
+    stepToRelatedLines: jsStepToRelatedLines,
   },
   python: {
     language: 'python',
     displayName: 'Python',
     code: pythonCode,
     lines: parseCodeLines(pythonCode),
-    stepToLines: pyStepToLines,
+    stepToActiveLine: pyStepToActiveLine,
+    stepToRelatedLines: pyStepToRelatedLines,
   },
   java: {
     language: 'java',
     displayName: 'Java',
     code: javaCode,
     lines: parseCodeLines(javaCode),
-    stepToLines: javaStepToLines,
+    stepToActiveLine: javaStepToActiveLine,
+    stepToRelatedLines: javaStepToRelatedLines,
   },
   golang: {
     language: 'golang',
     displayName: 'Go',
     code: golangCode,
     lines: parseCodeLines(golangCode),
-    stepToLines: goStepToLines,
+    stepToActiveLine: goStepToActiveLine,
+    stepToRelatedLines: goStepToRelatedLines,
   },
 };
 
