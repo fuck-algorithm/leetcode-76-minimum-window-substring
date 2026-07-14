@@ -8,8 +8,6 @@
   justify-content: center;
   gap: 0.5rem;
   flex-wrap: wrap;
-  flex-shrink: 0;
-  width: 100%;
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -155,6 +153,7 @@
   overflow: visible;
   flex: 1;
   min-width: 120px;
+  max-width: 500px;
 }
 
 .progress-bar-fill {
