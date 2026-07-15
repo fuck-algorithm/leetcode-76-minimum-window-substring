@@ -43,7 +43,7 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
 
     // 垂直布局：从顶部 padding 开始，按区块累加 y 坐标，消除重叠
     // scale 让整体布局随画布高度自适应（矮画布压缩间距，高画布展开）
-    const contentHeight = 340; // 各区块自然总高度基准
+    const contentHeight = 248; // 各区块自然总高度基准（已移除画布内步骤说明框）
     const topPad = 12;
     const scale = Math.min(1, Math.max(0.85, (height - topPad * 2) / contentHeight));
     const gap = (base: number) => base * scale;
@@ -68,11 +68,8 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
     // 区块 5：目标字符串
     const targetY = statusY + gap(22);
 
-    // 区块 6：频次对比
+    // 区块 6：频次对比（画布末尾区块，步骤说明已移至 ControlPanel）
     const freqY = targetY + gap(25);
-
-    // 区块 7：步骤说明（位于频次对比下方，间距需覆盖频次区块 ~52px 纵深）
-    const descY = freqY + gap(82);
 
     // 绘制图例
     svg.append('rect')
@@ -380,26 +377,6 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
           .text('✓');
       }
     });
-
-    // 绘制步骤说明
-    const descText = currentStep.description;
-    
-    g.append('rect')
-      .attr('x', 15)
-      .attr('y', descY - 14)
-      .attr('width', width - 30)
-      .attr('height', 36)
-      .attr('rx', 6)
-      .attr('fill', 'rgba(31, 41, 55, 0.8)')
-      .attr('stroke', 'rgba(255, 255, 255, 0.1)');
-
-    g.append('text')
-      .attr('x', width / 2)
-      .attr('y', descY + 5)
-      .attr('text-anchor', 'middle')
-      .attr('fill', '#e0e0e0')
-      .attr('font-size', '11px')
-      .text(descText.length > 90 ? descText.substring(0, 90) + '...' : descText);
 
     // 缩放功能
     const zoom = d3.zoom<SVGSVGElement, unknown>()
