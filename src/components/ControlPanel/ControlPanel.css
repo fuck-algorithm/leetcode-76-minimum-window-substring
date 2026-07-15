@@ -10,7 +10,8 @@
 }
 
 .step-description {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   font-size: 11px;
   color: #e0e0e0;
   background: rgba(31, 41, 55, 0.6);
@@ -19,7 +20,6 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  text-align: center;
   line-height: 1.4;
 }
 
@@ -140,13 +140,11 @@
   font-weight: 600;
 }
 
-.progress-group {
+.progress-row {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  flex: 1;
-  min-width: 160px;
-  max-width: 560px;
+  gap: 0.5rem;
+  width: 100%;
 }
 
 .progress-label {
@@ -165,7 +163,7 @@
   cursor: pointer;
   overflow: visible;
   flex: 1;
-  min-width: 100px;
+  min-width: 0;
 }
 
 .progress-bar-fill {
