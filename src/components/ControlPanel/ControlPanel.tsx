@@ -87,92 +87,96 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
 
   return (
     <div className="control-panel">
-      <div className="control-buttons">
-        <button className="control-btn" onClick={onReset} title="重置 (R)">
-          <span className="btn-icon">↺</span>
-          <span className="btn-text">重置</span>
-          <span className="btn-shortcut">R</span>
-        </button>
-        
-        <button 
-          className="control-btn" 
-          onClick={onPrev} 
-          disabled={currentStep === 0}
-          title="上一步 (←)"
-        >
-          <span className="btn-icon">←</span>
-          <span className="btn-text">上一步</span>
-          <span className="btn-shortcut">←</span>
-        </button>
-        
-        <button 
-          className="control-btn primary" 
-          onClick={isPlaying ? onPause : onPlay}
-          title={isPlaying ? '暂停 (Space)' : '播放 (Space)'}
-        >
-          <span className="btn-icon">{isPlaying ? '⏸' : '▶'}</span>
-          <span className="btn-text">{isPlaying ? '暂停' : '播放'}</span>
-          <span className="btn-shortcut">Space</span>
-        </button>
-        
-        <button 
-          className="control-btn" 
-          onClick={onNext} 
-          disabled={currentStep >= totalSteps - 1}
-          title="下一步 (→)"
-        >
-          <span className="btn-icon">→</span>
-          <span className="btn-text">下一步</span>
-          <span className="btn-shortcut">→</span>
-        </button>
-      </div>
-
-      <div className="speed-control">
-        <span className="speed-label">速度:</span>
-        <div className="speed-buttons">
-          {speedOptions.map((s) => (
-            <button
-              key={s}
-              className={`speed-btn ${speed === s ? 'active' : ''}`}
-              onClick={() => handleSpeedChange(s)}
-            >
-              {s}x
-            </button>
-          ))}
+      {stepDescription && (
+        <div className="step-description" title={stepDescription}>
+          {stepDescription}
         </div>
-      </div>
+      )}
 
-      <div className="stats-row">
-        <div className="stat-item">
-          <span className="stat-label">步骤</span>
-          <span className="stat-value">{currentStep + 1} / {totalSteps}</span>
+      <div className="control-row">
+        <div className="control-buttons">
+          <button className="control-btn" onClick={onReset} title="重置 (R)">
+            <span className="btn-icon">↺</span>
+            <span className="btn-text">重置</span>
+            <span className="btn-shortcut">R</span>
+          </button>
+
+          <button
+            className="control-btn"
+            onClick={onPrev}
+            disabled={currentStep === 0}
+            title="上一步 (←)"
+          >
+            <span className="btn-icon">←</span>
+            <span className="btn-text">上一步</span>
+            <span className="btn-shortcut">←</span>
+          </button>
+
+          <button
+            className="control-btn primary"
+            onClick={isPlaying ? onPause : onPlay}
+            title={isPlaying ? '暂停 (Space)' : '播放 (Space)'}
+          >
+            <span className="btn-icon">{isPlaying ? '⏸' : '▶'}</span>
+            <span className="btn-text">{isPlaying ? '暂停' : '播放'}</span>
+            <span className="btn-shortcut">Space</span>
+          </button>
+
+          <button
+            className="control-btn"
+            onClick={onNext}
+            disabled={currentStep >= totalSteps - 1}
+            title="下一步 (→)"
+          >
+            <span className="btn-icon">→</span>
+            <span className="btn-text">下一步</span>
+            <span className="btn-shortcut">→</span>
+          </button>
         </div>
-      </div>
 
-      <div 
-        className="progress-bar-container"
-        ref={progressRef}
-        onMouseDown={handleMouseDown}
-      >
-        <div 
-          className="progress-bar-fill" 
-          style={{ width: `${progress}%` }}
-        />
-        <div 
-          className="progress-thumb"
-          style={{ left: `${progress}%` }}
-        />
-        <div className="progress-steps">
-          {Array.from({ length: Math.min(totalSteps, 20) }).map((_, i) => {
-            const stepIndex = Math.round((i / 19) * (totalSteps - 1));
-            return (
-              <div 
-                key={i}
-                className={`progress-dot ${stepIndex <= currentStep ? 'passed' : ''}`}
-                style={{ left: `${(stepIndex / (totalSteps - 1)) * 100}%` }}
-              />
-            );
-          })}
+        <div className="speed-control">
+          <span className="speed-label">速度:</span>
+          <div className="speed-buttons">
+            {speedOptions.map((s) => (
+              <button
+                key={s}
+                className={`speed-btn ${speed === s ? 'active' : ''}`}
+                onClick={() => handleSpeedChange(s)}
+              >
+                {s}x
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="progress-group">
+          <span className="progress-label">{currentStep + 1} / {totalSteps}</span>
+          <div
+            className="progress-bar-container"
+            ref={progressRef}
+            onMouseDown={handleMouseDown}
+          >
+            <div
+              className="progress-bar-fill"
+              style={{ width: `${progress}%` }}
+            />
+            <div
+              className="progress-thumb"
+              style={{ left: `${progress}%` }}
+            />
+            <div className="progress-steps">
+              {Array.from({ length: Math.min(totalSteps, 20) }).map((_, i) => {
+                const stepIndex = Math.round((i / 19) * (totalSteps - 1));
+                return (
+                  <div
+                    key={i}
+                    className={`progress-dot ${stepIndex <= currentStep ? 'passed' : ''}`}
+                    style={{ left: `${(stepIndex / (totalSteps - 1)) * 100}%` }}
+                  />
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
     </div>
