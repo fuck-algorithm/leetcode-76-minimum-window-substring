@@ -87,13 +87,13 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
 
   return (
     <div className="control-panel">
-      {stepDescription && (
-        <div className="step-description" title={stepDescription}>
-          {stepDescription}
-        </div>
-      )}
-
       <div className="control-row">
+        {stepDescription && (
+          <div className="step-description" title={stepDescription}>
+            {stepDescription}
+          </div>
+        )}
+
         <div className="control-buttons">
           <button className="control-btn" onClick={onReset} title="重置 (R)">
             <span className="btn-icon">↺</span>
@@ -148,34 +148,34 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             ))}
           </div>
         </div>
+      </div>
 
-        <div className="progress-group">
-          <span className="progress-label">{currentStep + 1} / {totalSteps}</span>
+      <div className="progress-row">
+        <span className="progress-label">{currentStep + 1} / {totalSteps}</span>
+        <div
+          className="progress-bar-container"
+          ref={progressRef}
+          onMouseDown={handleMouseDown}
+        >
           <div
-            className="progress-bar-container"
-            ref={progressRef}
-            onMouseDown={handleMouseDown}
-          >
-            <div
-              className="progress-bar-fill"
-              style={{ width: `${progress}%` }}
-            />
-            <div
-              className="progress-thumb"
-              style={{ left: `${progress}%` }}
-            />
-            <div className="progress-steps">
-              {Array.from({ length: Math.min(totalSteps, 20) }).map((_, i) => {
-                const stepIndex = Math.round((i / 19) * (totalSteps - 1));
-                return (
-                  <div
-                    key={i}
-                    className={`progress-dot ${stepIndex <= currentStep ? 'passed' : ''}`}
-                    style={{ left: `${(stepIndex / (totalSteps - 1)) * 100}%` }}
-                  />
-                );
-              })}
-            </div>
+            className="progress-bar-fill"
+            style={{ width: `${progress}%` }}
+          />
+          <div
+            className="progress-thumb"
+            style={{ left: `${progress}%` }}
+          />
+          <div className="progress-steps">
+            {Array.from({ length: Math.min(totalSteps, 20) }).map((_, i) => {
+              const stepIndex = Math.round((i / 19) * (totalSteps - 1));
+              return (
+                <div
+                  key={i}
+                  className={`progress-dot ${stepIndex <= currentStep ? 'passed' : ''}`}
+                  style={{ left: `${(stepIndex / (totalSteps - 1)) * 100}%` }}
+                />
+              );
+            })}
           </div>
         </div>
       </div>
