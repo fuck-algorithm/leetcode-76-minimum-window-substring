@@ -5,6 +5,7 @@ import './ControlPanel.css';
 interface ControlPanelProps {
   currentStep: number;
   totalSteps: number;
+  stepDescription?: string;
   isPlaying: boolean;
   onPlay: () => void;
   onPause: () => void;
@@ -19,6 +20,7 @@ interface ControlPanelProps {
 const ControlPanel: React.FC<ControlPanelProps> = ({
   currentStep,
   totalSteps,
+  stepDescription,
   isPlaying,
   onPlay,
   onPause,

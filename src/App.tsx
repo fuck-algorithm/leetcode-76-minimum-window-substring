@@ -207,6 +207,7 @@ const App: React.FC = () => {
           <ControlPanel
             currentStep={currentStep}
             totalSteps={steps.length}
+            stepDescription={currentStepData?.description}
             isPlaying={isPlaying}
             onPlay={() => setIsPlaying(true)}
             onPause={() => setIsPlaying(false)}
