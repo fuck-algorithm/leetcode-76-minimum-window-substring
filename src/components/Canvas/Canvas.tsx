@@ -41,11 +41,12 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
     const charHeight = 32;
     const startX = (width - s.length * charWidth) / 2;
 
-    // 垂直布局：从顶部 padding 开始，按区块累加 y 坐标，消除重叠
-    // scale 让整体布局随画布高度自适应（矮画布压缩间距，高画布展开）
+    // 垂直布局：以 topPad 为顶锚计算各区块相对 y 坐标，累加得内容实际总高，
+    // 再用 verticalOffset 把整体下移，实现高画布下内容垂直居中、消除底部大片空白。
+    // scale 让整体布局随画布高度自适应（矮画布压缩间距，高画布展开填充），上限放宽到 1.4。
     const contentHeight = 248; // 各区块自然总高度基准（已移除画布内步骤说明框）
     const topPad = 12;
-    const scale = Math.min(1, Math.max(0.85, (height - topPad * 2) / contentHeight));
+    const scale = Math.min(1.4, Math.max(0.85, (height - topPad * 2) / contentHeight));
     const gap = (base: number) => base * scale;
 
     // 区块 1：图例（占 1 行高度）
@@ -71,47 +72,62 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
     // 区块 6：频次对比（画布末尾区块，步骤说明已移至 ControlPanel）
     const freqY = targetY + gap(25);
 
+    // 内容实际总高度：从 topPad 到频次块最后一行（freqY + 52）
+    const actualContentHeight = freqY + 52 - topPad;
+    // 垂直居中偏移：画布高于内容时把整体下移；内容高于画布时钳制为 0 顶对齐避免裁切
+    const verticalOffset = Math.max(0, (height - actualContentHeight) / 2 - topPad / 2);
+
+    // 应用垂直居中偏移：所有 y 坐标加上 verticalOffset
+    const adjustedLegendY = legendY + verticalOffset;
+    const adjustedTitleY = titleY + verticalOffset;
+    const adjustedStringY = stringY + verticalOffset;
+    const adjustedLeftPointerTopY = leftPointerTopY + verticalOffset;
+    const adjustedRightPointerBottomY = rightPointerBottomY + verticalOffset;
+    const adjustedStatusY = statusY + verticalOffset;
+    const adjustedTargetY = targetY + verticalOffset;
+    const adjustedFreqY = freqY + verticalOffset;
+
     // 绘制图例
     svg.append('rect')
       .attr('x', legendStartX)
-      .attr('y', legendY - 8)
+      .attr('y', adjustedLegendY - 8)
       .attr('width', 16)
       .attr('height', 12)
       .attr('rx', 2)
       .attr('fill', '#f59e0b');
     svg.append('text')
       .attr('x', legendStartX + 20)
-      .attr('y', legendY)
+      .attr('y', adjustedLegendY)
       .attr('fill', '#e0e0e0')
       .attr('font-size', '10px')
       .text('当前窗口');
-    
+
     // 图例2: 最优解
     svg.append('rect')
       .attr('x', legendStartX + legendItemWidth)
-      .attr('y', legendY - 8)
+      .attr('y', adjustedLegendY - 8)
       .attr('width', 16)
       .attr('height', 12)
       .attr('rx', 2)
       .attr('fill', '#10b981');
     svg.append('text')
       .attr('x', legendStartX + legendItemWidth + 20)
-      .attr('y', legendY)
+      .attr('y', adjustedLegendY)
       .attr('fill', '#e0e0e0')
       .attr('font-size', '10px')
       .text('当前最优解');
-    
+
     // 图例3: 窗口外字符
     svg.append('rect')
       .attr('x', legendStartX + legendItemWidth * 2)
-      .attr('y', legendY - 8)
+      .attr('y', adjustedLegendY - 8)
       .attr('width', 16)
       .attr('height', 12)
       .attr('rx', 2)
       .attr('fill', '#374151');
     svg.append('text')
       .attr('x', legendStartX + legendItemWidth * 2 + 20)
-      .attr('y', legendY)
+      .attr('y', adjustedLegendY)
       .attr('fill', '#e0e0e0')
       .attr('font-size', '10px')
       .text('窗口外');
@@ -124,7 +140,7 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
     // 绘制标题
     g.append('text')
       .attr('x', width / 2)
-      .attr('y', titleY)
+      .attr('y', adjustedTitleY)
       .attr('text-anchor', 'middle')
       .attr('fill', '#e0e0e0')
       .attr('font-size', '12px')
@@ -133,11 +149,11 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
 
     // 绘制窗口背景
     const { left, right, minStart, minLen } = currentStep;
-    
+
     if (right > left) {
       g.append('rect')
         .attr('x', startX + left * charWidth - 4)
-        .attr('y', stringY - 8)
+        .attr('y', adjustedStringY - 8)
         .attr('width', (right - left) * charWidth + 8)
         .attr('height', charHeight + 16)
         .attr('rx', 8)
@@ -151,7 +167,7 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
     if (minStart >= 0 && minLen !== Infinity) {
       g.append('rect')
         .attr('x', startX + minStart * charWidth - 2)
-        .attr('y', stringY - 4)
+        .attr('y', adjustedStringY - 4)
         .attr('width', minLen * charWidth + 4)
         .attr('height', charHeight + 8)
         .attr('rx', 6)
@@ -166,7 +182,7 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
       .enter()
       .append('g')
       .attr('class', 'char-group')
-      .attr('transform', (_, i) => `translate(${startX + i * charWidth}, ${stringY})`);
+      .attr('transform', (_, i) => `translate(${startX + i * charWidth}, ${adjustedStringY})`);
 
     charGroup.append('rect')
       .attr('width', charWidth - 4)
@@ -219,7 +235,7 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
     // 绘制左指针（位于字符行上方独立区域）
     g.append('g')
       .attr('class', 'pointer-left')
-      .attr('transform', `translate(${startX + left * charWidth + (charWidth - 4) / 2}, ${leftPointerTopY})`)
+      .attr('transform', `translate(${startX + left * charWidth + (charWidth - 4) / 2}, ${adjustedLeftPointerTopY})`)
       .call(g => {
         g.append('rect')
           .attr('x', -12)
@@ -244,7 +260,7 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
     if (right > 0) {
       g.append('g')
         .attr('class', 'pointer-right')
-        .attr('transform', `translate(${startX + (right - 1) * charWidth + (charWidth - 4) / 2}, ${rightPointerBottomY})`)
+        .attr('transform', `translate(${startX + (right - 1) * charWidth + (charWidth - 4) / 2}, ${adjustedRightPointerBottomY})`)
         .call(g => {
           g.append('path')
             .attr('d', 'M0,-6 L-5,-14 L5,-14 Z')
@@ -279,17 +295,17 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
     
     g.append('rect')
       .attr('x', statusX)
-      .attr('y', statusY - 12)
+      .attr('y', adjustedStatusY - 12)
       .attr('width', statusWidth)
       .attr('height', 22)
       .attr('rx', 11)
       .attr('fill', statusBgColor)
       .attr('stroke', statusColor)
       .attr('stroke-width', 2);
-    
+
     g.append('text')
       .attr('x', width / 2)
-      .attr('y', statusY + 3)
+      .attr('y', adjustedStatusY + 3)
       .attr('text-anchor', 'middle')
       .attr('fill', statusColor)
       .attr('font-size', '11px')
@@ -299,7 +315,7 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
     // 绘制目标字符串
     g.append('text')
       .attr('x', width / 2)
-      .attr('y', targetY)
+      .attr('y', adjustedTargetY)
       .attr('text-anchor', 'middle')
       .attr('fill', '#e0e0e0')
       .attr('font-size', '12px')
@@ -322,7 +338,7 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
       // 字符标签
       g.append('text')
         .attr('x', x + freqWidth / 2)
-        .attr('y', freqY)
+        .attr('y', adjustedFreqY)
         .attr('text-anchor', 'middle')
         .attr('fill', '#fbbf24')
         .attr('font-size', '13px')
@@ -332,7 +348,7 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
       // 需要的数量
       g.append('rect')
         .attr('x', x + 5)
-        .attr('y', freqY + 6)
+        .attr('y', adjustedFreqY + 6)
         .attr('width', freqWidth - 10)
         .attr('height', 16)
         .attr('rx', 3)
@@ -341,7 +357,7 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
 
       g.append('text')
         .attr('x', x + freqWidth / 2)
-        .attr('y', freqY + 17)
+        .attr('y', adjustedFreqY + 17)
         .attr('text-anchor', 'middle')
         .attr('fill', '#9ca3af')
         .attr('font-size', '9px')
@@ -350,7 +366,7 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
       // 窗口中的数量
       g.append('rect')
         .attr('x', x + 5)
-        .attr('y', freqY + 26)
+        .attr('y', adjustedFreqY + 26)
         .attr('width', freqWidth - 10)
         .attr('height', 16)
         .attr('rx', 3)
@@ -359,7 +375,7 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
 
       g.append('text')
         .attr('x', x + freqWidth / 2)
-        .attr('y', freqY + 37)
+        .attr('y', adjustedFreqY + 37)
         .attr('text-anchor', 'middle')
         .attr('fill', isMatched ? '#10b981' : '#f59e0b')
         .attr('font-size', '9px')
@@ -370,7 +386,7 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
       if (isMatched) {
         g.append('text')
           .attr('x', x + freqWidth / 2)
-          .attr('y', freqY + 52)
+          .attr('y', adjustedFreqY + 52)
           .attr('text-anchor', 'middle')
           .attr('fill', '#10b981')
           .attr('font-size', '12px')
