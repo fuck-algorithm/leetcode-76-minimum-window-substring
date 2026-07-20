@@ -230,26 +230,6 @@ const App: React.FC = () => {
             speed={speed}
             onSpeedChange={setSpeed}
           />
-
-          <div className="keyboard-hints">
-            <div className="hint-item">
-              <kbd>Space</kbd>
-              <span>播放/暂停</span>
-            </div>
-            <div className="hint-item">
-              <kbd>←</kbd>
-              <kbd>→</kbd>
-              <span>上一步/下一步</span>
-            </div>
-            <div className="hint-item">
-              <kbd>R</kbd>
-              <span>重置</span>
-            </div>
-            <div className="hint-item">
-              <kbd>?</kbd>
-              <span>帮助</span>
-            </div>
-          </div>
         </div>
       </main>
 
