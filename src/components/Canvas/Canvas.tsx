@@ -75,7 +75,7 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
     // 内容实际总高度：从 topPad 到频次块最后一行（freqY + 52）
     const actualContentHeight = freqY + 52 - topPad;
     // 垂直居中偏移：画布高于内容时把整体下移；内容高于画布时钳制为 0 顶对齐避免裁切
-    const verticalOffset = Math.max(0, (height - actualContentHeight) / 2 - topPad / 2);
+    const verticalOffset = Math.max(0, (height - actualContentHeight) / 2 - topPad);
 
     // 应用垂直居中偏移：所有 y 坐标加上 verticalOffset
     const adjustedLegendY = legendY + verticalOffset;
