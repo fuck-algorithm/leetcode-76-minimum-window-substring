@@ -10,7 +10,8 @@
 }
 
 .step-description {
-  flex: 1;
+  flex: 0 1 auto;
+  max-width: 40%;
   min-width: 0;
   font-size: 11px;
   color: #e0e0e0;
