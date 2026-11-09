@@ -215,18 +215,47 @@
 }
 
 @media (max-width: 900px) {
+  .app {
+    height: auto;
+    min-height: 100vh;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .main {
+    flex: 1 0 auto;
+    overflow: visible;
+  }
+
+  .container {
+    overflow: visible;
+  }
+
   .main-content {
+    flex: 0 0 auto;
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: minmax(180px, 1fr) minmax(160px, 22vh);
+    grid-template-rows: 640px 220px;
+    min-height: auto;
+    overflow: visible;
+  }
+
+  .left-panel {
+    height: 640px;
+    min-height: 640px;
+    overflow: visible;
   }
 
   .canvas-container {
-    min-height: 180px;
+    flex: 0 0 640px;
+    height: 640px;
+    min-height: 640px;
   }
 
   .right-panel {
-    min-height: 160px;
-    max-height: 220px;
+    height: 220px;
+    min-height: 220px;
+    max-height: none;
+    overflow: hidden;
   }
 }
 
@@ -241,6 +270,19 @@
 
   .main {
     padding: 0.5rem;
+  }
+
+  .input-group {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .input-row {
+    flex-basis: calc(50% - 0.25rem);
+  }
+
+  .preset-buttons {
+    flex-wrap: wrap;
   }
 }
 
