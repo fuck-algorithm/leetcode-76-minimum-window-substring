@@ -67,58 +67,36 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep, stepDescription }) =
     }
 
     const width = Math.max(dimensions.width, s.length * 26 + 24);
-    const height = Math.max(dimensions.height, 500);
+    const height = Math.max(dimensions.height, 640);
     const minCharWidth = 26;
     const charWidth = Math.max(minCharWidth, Math.min(32, (width - 80) / s.length));
     const charHeight = 32;
     const contentWidth = s.length * charWidth;
     const startX = Math.max(12, (width - contentWidth) / 2);
 
-    // 垂直布局：以 topPad 为顶锚计算各区块相对 y 坐标，累加得内容实际总高，
-    // 再用 verticalOffset 把整体下移，实现高画布下内容垂直居中、消除底部大片空白。
-    // scale 让整体布局随画布高度自适应（矮画布压缩间距，高画布展开填充），上限放宽到 1.4。
-    const contentHeight = 360;
-    const topPad = 12;
-    const scale = Math.min(1.2, Math.max(0.5, (height - topPad * 2) / contentHeight));
-    const gap = (base: number) => base * scale;
-
-    // 区块 1：图例（占 1 行高度）
-    const legendBlockH = gap(20);
-    const legendY = topPad + 10;
+    // Anchor the same teaching lanes to the top edge at every viewport size; do not re-center
+    // individual lanes, which made pointers, frequency cards and status badges drift apart.
+    const gap = (base: number) => base;
+    const legendY = 22;
     const legendItemWidth = 100;
     const legendStartX = (width - legendItemWidth * 3) / 2;
-
-    // 区块 2：源字符串标题
-    const titleY = legendY + legendBlockH + gap(8);
-
-    // 区块 3：字符行 + 指针；焦点/流向标注使用字符行下方独立轨道。
-    const stringY = titleY + gap(84);
-    const leftPointerTopY = titleY + gap(28); // 左指针使用字符行上方独立轨道
-    const rightPointerBottomY = stringY + charHeight + gap(86); // R 排他边界位于窗口与数据流说明轨道之后
-
-    // 区块 4：窗口状态徽章
-    const statusY = rightPointerBottomY + gap(70);
-
-    // 区块 5：先解释 valid，再呈现 need/window 频次对照。
-    const targetY = statusY + gap(34);
-    const freqY = targetY + gap(60);
-
-    // 内容实际总高度：从 topPad 到频次块最后一行（freqY + 52）
-    const actualContentHeight = freqY + 220 - topPad;
-    // 垂直居中偏移：画布高于内容时把整体下移；内容高于画布时钳制为 0 顶对齐避免裁切
-    const verticalOffset = Math.max(0, (height - actualContentHeight) / 2 - topPad);
-
-    // 应用垂直居中偏移：所有 y 坐标加上 verticalOffset
-    const adjustedLegendY = legendY + verticalOffset;
-    const adjustedTitleY = titleY + verticalOffset;
-    const adjustedStringY = stringY + verticalOffset;
-    const adjustedLeftPointerTopY = leftPointerTopY + verticalOffset;
-    const adjustedRightPointerBottomY = rightPointerBottomY + verticalOffset;
-    const adjustedStatusY = statusY + verticalOffset;
-    const adjustedTargetY = targetY + verticalOffset;
-    const adjustedFreqY = freqY + verticalOffset;
-    const flowTrackY = adjustedRightPointerBottomY + gap(56);
-    const infoShiftY = height < 360 ? Math.max(0, 360 - height) : 0;
+    const titleY = 48;
+    const stringY = 148;
+    const leftPointerTopY = stringY - 22;
+    const rightPointerTopY = stringY + charHeight + 54;
+    const statusY = stringY + charHeight + 126;
+    const targetY = statusY + 42;
+    const freqY = targetY + 78;
+    const adjustedLegendY = legendY;
+    const adjustedTitleY = titleY;
+    const adjustedStringY = stringY;
+    const adjustedLeftPointerTopY = leftPointerTopY;
+    const adjustedRightPointerBottomY = rightPointerTopY;
+    const adjustedStatusY = statusY;
+    const adjustedTargetY = targetY;
+    const adjustedFreqY = freqY;
+    const flowTrackY = stringY + charHeight + 146;
+    const infoShiftY = 0;
 
     // 绘制图例
     svg.append('rect')
@@ -622,7 +600,7 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep, stepDescription }) =
       <svg
         ref={svgRef}
         width={Math.max(dimensions.width, s.length * 26 + 24)}
-        height={Math.max(dimensions.height, 600)}
+        height={Math.max(dimensions.height, 430)}
         className="algorithm-canvas"
       />
       <div className="canvas-hint">
