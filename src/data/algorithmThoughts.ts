@@ -24,8 +24,8 @@ export const algorithmThoughts = {
 - **need**：记录 t 中每个字符需要的数量
 - **window**：记录当前窗口中每个字符的数量
 
-使用变量 **valid** 记录窗口中已经满足条件的字符种类数。
-当 valid 等于 need 的大小时，说明窗口已经包含了 t 的所有字符。`,
+使用变量 **valid** 记录已达标的不同字符种类数：只有 window[c] >= need[c] 的字符才计入；同一种字符多出来的副本不会重复计数。
+当 valid 等于 need.size 时，窗口才覆盖 t 的全部需求。窗口边界始终是左闭右开 [left, right)，长度为 right - left。`,
     },
     {
       title: '🔄 算法流程',

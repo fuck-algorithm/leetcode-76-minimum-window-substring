@@ -7,6 +7,12 @@ export interface PresetExample {
 
 export const presetExamples: PresetExample[] = [
   {
+    name: '重复需求教学',
+    s: 'AAABC',
+    t: 'AABC',
+    description: 'A 需要 2 个：第 3 个 A 是多余副本；收缩时移除到不足才会失去覆盖',
+  },
+  {
     name: '力扣示例1',
     s: 'ADOBECODEBANC',
     t: 'ABC',

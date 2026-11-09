@@ -7,26 +7,31 @@ interface CanvasProps {
   s: string;
   t: string;
   currentStep: AlgorithmStep | null;
+  stepDescription?: string;
 }
 
-const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
+const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep, stepDescription }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 400 });
   const [transform, setTransform] = useState(d3.zoomIdentity);
 
-  // 响应式尺寸
+  // 用 ResizeObserver 跟随网格重排，避免初次测量到隐藏/折叠尺寸后画布停留在 16×16。
   useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
     const updateDimensions = () => {
-      if (containerRef.current) {
-        const { width, height } = containerRef.current.getBoundingClientRect();
-        setDimensions({ width: width - 20, height: height - 20 });
+      const { width, height } = container.getBoundingClientRect();
+      if (width > 0 && height > 0) {
+        setDimensions({ width: Math.max(1, width - 20), height: Math.max(1, height - 20) });
       }
     };
 
+    const observer = new ResizeObserver(updateDimensions);
+    observer.observe(container);
     updateDimensions();
-    window.addEventListener('resize', updateDimensions);
-    return () => window.removeEventListener('resize', updateDimensions);
+    return () => observer.disconnect();
   }, []);
 
   // D3 渲染
@@ -35,18 +40,46 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
 
     const svg = d3.select(svgRef.current);
     svg.selectAll('*').remove();
+    svg.append('defs').append('marker')
+      .attr('id', 'focus-arrow-head')
+      .attr('viewBox', '0 0 10 10')
+      .attr('refX', 8)
+      .attr('refY', 5)
+      .attr('markerWidth', 5)
+      .attr('markerHeight', 5)
+      .attr('orient', 'auto-start-reverse')
+      .append('path')
+      .attr('d', 'M0,0 L10,5 L0,10 z')
+      .attr('fill', '#fbbf24');
+    const flowMarkers = svg.select('defs');
+    for (const [id, color, orient] of [['flow-in-head', '#34d399', 'auto-start-reverse'], ['flow-out-head', '#fb7185', 'auto']]) {
+      flowMarkers.append('marker')
+        .attr('id', id)
+        .attr('viewBox', '0 0 10 10')
+        .attr('refX', 8)
+        .attr('refY', 5)
+        .attr('markerWidth', 5)
+        .attr('markerHeight', 5)
+        .attr('orient', orient)
+        .append('path')
+        .attr('d', 'M0,0 L10,5 L0,10 z')
+        .attr('fill', color);
+    }
 
-    const { width, height } = dimensions;
-    const charWidth = Math.min(32, (width - 80) / s.length);
+    const width = Math.max(dimensions.width, s.length * 26 + 24);
+    const height = Math.max(dimensions.height, 500);
+    const minCharWidth = 26;
+    const charWidth = Math.max(minCharWidth, Math.min(32, (width - 80) / s.length));
     const charHeight = 32;
-    const startX = (width - s.length * charWidth) / 2;
+    const contentWidth = s.length * charWidth;
+    const startX = Math.max(12, (width - contentWidth) / 2);
 
     // 垂直布局：以 topPad 为顶锚计算各区块相对 y 坐标，累加得内容实际总高，
     // 再用 verticalOffset 把整体下移，实现高画布下内容垂直居中、消除底部大片空白。
     // scale 让整体布局随画布高度自适应（矮画布压缩间距，高画布展开填充），上限放宽到 1.4。
-    const contentHeight = 248; // 各区块自然总高度基准（已移除画布内步骤说明框）
+    const contentHeight = 360;
     const topPad = 12;
-    const scale = Math.min(1.4, Math.max(0.85, (height - topPad * 2) / contentHeight));
+    const scale = Math.min(1.2, Math.max(0.5, (height - topPad * 2) / contentHeight));
     const gap = (base: number) => base * scale;
 
     // 区块 1：图例（占 1 行高度）
@@ -58,22 +91,20 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
     // 区块 2：源字符串标题
     const titleY = legendY + legendBlockH + gap(8);
 
-    // 区块 3：字符行 + 指针（左指针在上方，右指针在下方）
-    const stringY = titleY + gap(20);
-    const leftPointerTopY = stringY - gap(24); // 左指针标签，独立于字符行上方
-    const rightPointerBottomY = stringY + charHeight + gap(22); // 右指针标签，独立于字符行下方
+    // 区块 3：字符行 + 指针；焦点/流向标注使用字符行下方独立轨道。
+    const stringY = titleY + gap(84);
+    const leftPointerTopY = titleY + gap(28); // 左指针使用字符行上方独立轨道
+    const rightPointerBottomY = stringY + charHeight + gap(86); // R 排他边界位于窗口与数据流说明轨道之后
 
     // 区块 4：窗口状态徽章
-    const statusY = rightPointerBottomY + gap(18);
+    const statusY = rightPointerBottomY + gap(70);
 
-    // 区块 5：目标字符串
-    const targetY = statusY + gap(22);
-
-    // 区块 6：频次对比（画布末尾区块，步骤说明已移至 ControlPanel）
-    const freqY = targetY + gap(25);
+    // 区块 5：先解释 valid，再呈现 need/window 频次对照。
+    const targetY = statusY + gap(34);
+    const freqY = targetY + gap(60);
 
     // 内容实际总高度：从 topPad 到频次块最后一行（freqY + 52）
-    const actualContentHeight = freqY + 52 - topPad;
+    const actualContentHeight = freqY + 220 - topPad;
     // 垂直居中偏移：画布高于内容时把整体下移；内容高于画布时钳制为 0 顶对齐避免裁切
     const verticalOffset = Math.max(0, (height - actualContentHeight) / 2 - topPad);
 
@@ -86,6 +117,8 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
     const adjustedStatusY = statusY + verticalOffset;
     const adjustedTargetY = targetY + verticalOffset;
     const adjustedFreqY = freqY + verticalOffset;
+    const flowTrackY = adjustedRightPointerBottomY + gap(56);
+    const infoShiftY = height < 360 ? Math.max(0, 360 - height) : 0;
 
     // 绘制图例
     svg.append('rect')
@@ -137,19 +170,129 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
       .attr('class', 'main-group')
       .attr('transform', transform.toString());
 
-    // 绘制标题
+    const { left, right, minStart, minLen } = currentStep;
+    const windowByChar = new Map<string, number>();
+    for (let index = left; index < right; index++) {
+      const char = s[index];
+      windowByChar.set(char, (windowByChar.get(char) || 0) + 1);
+    }
+
+    // 操作徽标与本步指向的字符索引，让文字解释能对应到具体格子。
+    const operationWidth = Math.max(86, currentStep.operation.length * 12 + 24);
+    const titleMaxChars = Math.max(8, Math.floor((width - operationWidth - 40) / 7));
+    const sourceTitle = `源字符串 s = "${s}"`;
+    const displayTitle = sourceTitle.length > titleMaxChars
+      ? `${sourceTitle.slice(0, titleMaxChars - 1)}…`
+      : sourceTitle;
+    const focusIndex = currentStep.currentIndex;
+
+    // 给右侧徽标预留固定区域，源字符串过长时省略，避免标题与徽标叠字。
     g.append('text')
-      .attr('x', width / 2)
+      .attr('x', 12)
       .attr('y', adjustedTitleY)
-      .attr('text-anchor', 'middle')
+      .attr('text-anchor', 'start')
       .attr('fill', '#e0e0e0')
       .attr('font-size', '12px')
       .attr('font-weight', '600')
-      .text(`源字符串 s = "${s}"`);
+      .text(displayTitle)
+      .append('title')
+      .text(sourceTitle);
+    const focusX = focusIndex === undefined
+      ? width / 2
+      : startX + focusIndex * charWidth + (charWidth - 4) / 2;
+    g.append('rect')
+      .attr('class', 'operation-badge')
+      .attr('x', width - operationWidth - 12)
+      .attr('y', adjustedTitleY - 16)
+      .attr('width', operationWidth)
+      .attr('height', 22)
+      .attr('rx', 11)
+      .attr('fill', '#1f6b57')
+      .attr('stroke', '#34d399');
+    g.append('text')
+      .attr('class', 'operation-badge-text')
+      .attr('x', width - operationWidth / 2 - 12)
+      .attr('y', adjustedTitleY - 1)
+      .attr('text-anchor', 'middle')
+      .attr('fill', '#ecfdf5')
+      .attr('font-size', '10px')
+      .attr('font-weight', '700')
+      .text(currentStep.operation);
+
+    const showFlow = ['expand', 'skip', 'compare', 'found', 'shrink'].includes(currentStep.type);
+    if (showFlow && focusIndex !== undefined && focusIndex >= 0 && focusIndex < s.length) {
+      const isRemoval = currentStep.type === 'shrink';
+      const flowStart = currentStep.type === 'compare' || currentStep.type === 'found'
+        ? startX + left * charWidth
+        : focusX + (isRemoval ? -8 : 8);
+      const flowEnd = currentStep.type === 'compare' || currentStep.type === 'found'
+        ? startX + right * charWidth - 4
+        : focusX + (isRemoval ? -24 : 24);
+      const flowColor = isRemoval ? '#fb7185' : '#34d399';
+      const flowCount = currentStep.currentChar
+        ? windowByChar.get(currentStep.currentChar) || 0
+        : 0;
+      const needCount = currentStep.currentChar
+        ? currentStep.need.get(currentStep.currentChar) || 0
+        : 0;
+      const flowText = isRemoval
+        ? `${currentStep.currentChar}：窗口 ${flowCount + 1} → ${flowCount} / 需要 ${needCount}；valid=${currentStep.valid}`
+        : currentStep.type === 'skip'
+          ? `${currentStep.currentChar}：不在 need，跳过计数`
+          : currentStep.type === 'compare' || currentStep.type === 'found'
+            ? `候选 [${left}, ${right})：${currentStep.result ?? ''} · 长度 ${right - left}；最优 ${currentStep.minLen === Infinity ? '尚无' : currentStep.minLen}`
+            : `${currentStep.currentChar}：${Math.max(0, flowCount - 1)} → ${flowCount} / 需要 ${needCount}；valid=${currentStep.valid}`;
+      const flowWidth = Math.min(width - 24, Math.max(112, flowText.length * 6 + 20));
+      const flowX = width - flowWidth - 12;
+      const flowY = flowTrackY + infoShiftY;
+
+      g.append('rect')
+        .attr('class', 'data-flow-label')
+        .attr('x', flowX)
+        .attr('y', flowY - 14)
+        .attr('width', flowWidth)
+        .attr('height', 20)
+        .attr('rx', 8)
+        .attr('fill', '#111827')
+        .attr('stroke', flowColor);
+      g.append('text')
+        .attr('class', 'data-flow-text')
+        .attr('x', flowX + flowWidth / 2)
+        .attr('y', flowY)
+        .attr('text-anchor', 'middle')
+        .attr('fill', flowColor)
+        .attr('font-size', '9px')
+        .attr('font-weight', '700')
+        .text(flowText);
+      g.append('path')
+        .attr('class', 'data-flow-arrow')
+        .attr('d', `M${flowStart},${flowY - 10} Q${(flowStart + flowEnd) / 2},${flowY - 22} ${flowEnd},${flowY - 10}`)
+        .attr('fill', 'none')
+        .attr('stroke', flowColor)
+        .attr('stroke-width', 1.5)
+        .attr('marker-end', `url(#${isRemoval ? 'flow-out-head' : 'flow-in-head'})`);
+    }
+
+    if (focusIndex !== undefined && focusIndex >= 0 && focusIndex < s.length && currentStep.type !== 'compare') {
+      g.append('path')
+        .attr('class', 'focus-arrow')
+        .attr('d', `M${focusX},${adjustedStringY - 22 + infoShiftY} L${focusX},${adjustedStringY - 7 + infoShiftY}`)
+        .attr('stroke', '#fbbf24')
+        .attr('stroke-width', 2)
+        .attr('marker-end', 'url(#focus-arrow-head)');
+      const sharesLeftPointer = focusIndex === currentStep.left;
+      g.append('text')
+        .attr('class', 'focus-index-label')
+        .attr('x', focusX + (sharesLeftPointer ? 18 : 0))
+        .attr('y', adjustedStringY - 27 + infoShiftY)
+        .attr('text-anchor', sharesLeftPointer ? 'start' : 'middle')
+        .attr('fill', '#fbbf24')
+        .attr('font-size', '10px')
+        .attr('font-weight', '700')
+        .text(`${currentStep.type === 'shrink' ? '移出' : currentStep.type === 'found' ? '记录候选' : currentStep.operation.includes('跳过') ? '判断' : '读取'} [${focusIndex}]`);
+    }
 
     // 绘制窗口背景
-    const { left, right, minStart, minLen } = currentStep;
-
     if (right > left) {
       g.append('rect')
         .attr('x', startX + left * charWidth - 4)
@@ -163,20 +306,52 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
         .attr('stroke-dasharray', '5,3');
     }
 
-    // 绘制最小覆盖子串背景
+    // 历史最优答案使用字符行上方的范围标记，避免覆盖当前窗口字符填色。
     if (minStart >= 0 && minLen !== Infinity) {
-      g.append('rect')
-        .attr('x', startX + minStart * charWidth - 2)
-        .attr('y', adjustedStringY - 4)
-        .attr('width', minLen * charWidth + 4)
-        .attr('height', charHeight + 8)
-        .attr('rx', 6)
-        .attr('fill', 'rgba(16, 185, 129, 0.2)')
+      const bestStartX = startX + minStart * charWidth - 2;
+      const bestEndX = startX + (minStart + minLen) * charWidth - 2;
+      g.append('path')
+        .attr('class', 'best-window-range')
+        .attr('d', `M${bestStartX},${adjustedStringY - 8} v-6 H${bestEndX} v6`)
+        .attr('fill', 'none')
         .attr('stroke', '#10b981')
         .attr('stroke-width', 2);
+      g.append('text')
+        .attr('class', 'best-window-label')
+        .attr('x', (bestStartX + bestEndX) / 2)
+        .attr('y', adjustedStringY - 18)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#6ee7b7')
+        .attr('font-size', '9px')
+        .attr('font-weight', '700')
+        .text(`历史最优 [${minStart}, ${minStart + minLen}) · ${s.substring(minStart, minStart + minLen)}`);
     }
 
-    // 绘制字符
+    const bestWindowLabel = minStart >= 0 && minLen !== Infinity
+      ? `历史最优 [${minStart}, ${minStart + minLen}) · ${s.substring(minStart, minStart + minLen)}`
+      : '历史最优：尚无';
+    const currentWindowLabel = `当前窗口 [${left}, ${right}) · ${right > left ? s.substring(left, right) : '空'}`;
+    const currentWindowLabelY = adjustedStringY + charHeight + 27;
+    g.append('text')
+      .attr('class', 'current-window-label')
+      .attr('x', width / 2)
+      .attr('y', currentWindowLabelY)
+      .attr('text-anchor', 'middle')
+      .attr('fill', '#fcd34d')
+      .attr('font-size', '9px')
+      .attr('font-weight', '700')
+      .text(currentWindowLabel);
+    g.append('text')
+      .attr('class', 'best-window-label')
+      .attr('x', width / 2)
+      .attr('y', currentWindowLabelY + 13)
+      .attr('text-anchor', 'middle')
+      .attr('fill', '#6ee7b7')
+      .attr('font-size', '9px')
+      .attr('font-weight', '700')
+      .text(bestWindowLabel);
+
+    // 绘制字符；当前窗口橙色填充始终优先，历史最优只用绿色上沿标记。
     const charGroup = g.selectAll('.char-group')
       .data(s.split(''))
       .enter()
@@ -189,21 +364,13 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
       .attr('height', charHeight)
       .attr('rx', 6)
       .attr('fill', (_, i) => {
-        if (minStart >= 0 && minLen !== Infinity && i >= minStart && i < minStart + minLen) {
-          return '#10b981';
-        }
-        if (i >= left && i < right) {
-          return '#f59e0b';
-        }
+        if (i >= left && i < right) return '#f59e0b';
+        if (minStart >= 0 && minLen !== Infinity && i >= minStart && i < minStart + minLen) return '#10b981';
         return '#374151';
       })
       .attr('stroke', (_, i) => {
-        if (minStart >= 0 && minLen !== Infinity && i >= minStart && i < minStart + minLen) {
-          return '#059669';
-        }
-        if (i >= left && i < right) {
-          return '#d97706';
-        }
+        if (i >= left && i < right) return '#d97706';
+        if (minStart >= 0 && minLen !== Infinity && i >= minStart && i < minStart + minLen) return '#059669';
         return '#4b5563';
       })
       .attr('stroke-width', 2);
@@ -213,10 +380,8 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
       .attr('y', charHeight / 2 + 4)
       .attr('text-anchor', 'middle')
       .attr('fill', (_, i) => {
-        if ((minStart >= 0 && minLen !== Infinity && i >= minStart && i < minStart + minLen) || 
-            (i >= left && i < right)) {
-          return '#111827';
-        }
+        if (i >= left && i < right) return '#111827';
+        if (minStart >= 0 && minLen !== Infinity && i >= minStart && i < minStart + minLen) return '#111827';
         return '#e0e0e0';
       })
       .attr('font-size', '14px')
@@ -256,11 +421,11 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
           .attr('fill', '#f59e0b');
       });
 
-    // 绘制右指针（位于字符行下方独立区域）
-    if (right > 0) {
+    // R 标记半开窗口的排他边界，即下一个不包含的字符位置。
+    {
       g.append('g')
         .attr('class', 'pointer-right')
-        .attr('transform', `translate(${startX + (right - 1) * charWidth + (charWidth - 4) / 2}, ${adjustedRightPointerBottomY})`)
+        .attr('transform', `translate(${startX + right * charWidth - 2}, ${adjustedRightPointerBottomY})`)
         .call(g => {
           g.append('path')
             .attr('d', 'M0,-6 L-5,-14 L5,-14 Z')
@@ -279,6 +444,14 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
             .attr('font-size', '10px')
             .attr('font-weight', '700')
             .text('R');
+          g.append('text')
+            .attr('class', 'right-boundary-caption')
+            .attr('text-anchor', 'start')
+            .attr('x', 15)
+            .attr('y', 7)
+            .attr('fill', '#a7f3d0')
+            .attr('font-size', '9px')
+            .text('不含');
         });
     }
 
@@ -292,10 +465,18 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
     
     const statusWidth = statusText.length * 12 + 20;
     const statusX = (width - statusWidth) / 2;
+    const resultText = currentStep.type === 'complete'
+      ? currentStep.result
+        ? `结果 ${currentStep.result} · [${currentStep.minStart}, ${currentStep.minStart + currentStep.minLen}) · 长度 ${currentStep.minLen}`
+        : '结果为空 · 不存在覆盖窗口'
+      : '';
+    const bestLabel = minStart >= 0 && minLen !== Infinity
+      ? `历史最优 [${minStart}, ${minStart + minLen}) · ${s.substring(minStart, minStart + minLen)}`
+      : '历史最优：尚无';
     
     g.append('rect')
       .attr('x', statusX)
-      .attr('y', adjustedStatusY - 12)
+      .attr('y', adjustedStatusY + 8 + infoShiftY)
       .attr('width', statusWidth)
       .attr('height', 22)
       .attr('rx', 11)
@@ -305,22 +486,49 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
 
     g.append('text')
       .attr('x', width / 2)
-      .attr('y', adjustedStatusY + 3)
+      .attr('y', adjustedStatusY + 23 + infoShiftY)
       .attr('text-anchor', 'middle')
       .attr('fill', statusColor)
       .attr('font-size', '11px')
       .attr('font-weight', '600')
       .text(statusText);
+    if (resultText) {
+      g.append('rect')
+        .attr('class', 'final-result-card')
+        .attr('x', Math.max(12, width / 2 - Math.min(width - 24, resultText.length * 7 + 24) / 2))
+        .attr('y', adjustedStatusY + 42 + infoShiftY)
+        .attr('width', Math.min(width - 24, resultText.length * 7 + 24))
+        .attr('height', 26)
+        .attr('rx', 8)
+        .attr('fill', '#064e3b')
+        .attr('stroke', '#34d399');
+      g.append('text')
+        .attr('class', 'final-result-text')
+        .attr('x', width / 2)
+        .attr('y', adjustedStatusY + 59 + infoShiftY)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#d1fae5')
+        .attr('font-size', '10px')
+        .attr('font-weight', '700')
+        .text(resultText);
+    }
 
     // 绘制目标字符串
     g.append('text')
       .attr('x', width / 2)
-      .attr('y', adjustedTargetY)
+      .attr('y', adjustedTargetY + 24 + infoShiftY)
       .attr('text-anchor', 'middle')
       .attr('fill', '#e0e0e0')
       .attr('font-size', '12px')
       .attr('font-weight', '600')
-      .text(`目标字符串 t = "${t}"`);
+      .text(`valid = ${currentStep.valid} / ${currentStep.need.size} 种字符达标`);
+    g.append('text')
+      .attr('x', width / 2)
+      .attr('y', adjustedTargetY + 38 + infoShiftY)
+      .attr('text-anchor', 'middle')
+      .attr('fill', '#9ca3af')
+      .attr('font-size', '10px')
+      .text(`目标 t = "${t}" · 每种字符的频次达标才计 1`);
 
     // 绘制字符频次对比
     const needMap = currentStep.need;
@@ -338,7 +546,7 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
       // 字符标签
       g.append('text')
         .attr('x', x + freqWidth / 2)
-        .attr('y', adjustedFreqY)
+        .attr('y', adjustedFreqY + infoShiftY)
         .attr('text-anchor', 'middle')
         .attr('fill', '#fbbf24')
         .attr('font-size', '13px')
@@ -348,7 +556,7 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
       // 需要的数量
       g.append('rect')
         .attr('x', x + 5)
-        .attr('y', adjustedFreqY + 6)
+        .attr('y', adjustedFreqY + 6 + infoShiftY)
         .attr('width', freqWidth - 10)
         .attr('height', 16)
         .attr('rx', 3)
@@ -357,7 +565,7 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
 
       g.append('text')
         .attr('x', x + freqWidth / 2)
-        .attr('y', adjustedFreqY + 17)
+        .attr('y', adjustedFreqY + 17 + infoShiftY)
         .attr('text-anchor', 'middle')
         .attr('fill', '#9ca3af')
         .attr('font-size', '9px')
@@ -366,7 +574,7 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
       // 窗口中的数量
       g.append('rect')
         .attr('x', x + 5)
-        .attr('y', adjustedFreqY + 26)
+        .attr('y', adjustedFreqY + 26 + infoShiftY)
         .attr('width', freqWidth - 10)
         .attr('height', 16)
         .attr('rx', 3)
@@ -375,7 +583,7 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
 
       g.append('text')
         .attr('x', x + freqWidth / 2)
-        .attr('y', adjustedFreqY + 37)
+        .attr('y', adjustedFreqY + 37 + infoShiftY)
         .attr('text-anchor', 'middle')
         .attr('fill', isMatched ? '#10b981' : '#f59e0b')
         .attr('font-size', '9px')
@@ -383,15 +591,14 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
         .text(`窗口: ${windowCount}`);
 
       // 匹配标记
-      if (isMatched) {
-        g.append('text')
-          .attr('x', x + freqWidth / 2)
-          .attr('y', adjustedFreqY + 52)
-          .attr('text-anchor', 'middle')
-          .attr('fill', '#10b981')
-          .attr('font-size', '12px')
-          .text('✓');
-      }
+      g.append('text')
+        .attr('x', x + freqWidth / 2)
+        .attr('y', adjustedFreqY + 52 + infoShiftY)
+        .attr('text-anchor', 'middle')
+        .attr('fill', isMatched ? '#10b981' : '#fbbf24')
+        .attr('font-size', '9px')
+        .attr('font-weight', '700')
+        .text(isMatched ? '达标' : `差 ${Math.max(0, needCount - windowCount)}`);
     });
 
     // 缩放功能
@@ -408,10 +615,14 @@ const Canvas: React.FC<CanvasProps> = ({ s, t, currentStep }) => {
 
   return (
     <div className="canvas-container" ref={containerRef}>
-      <svg 
-        ref={svgRef} 
-        width={dimensions.width} 
-        height={dimensions.height}
+      <section className="canvas-step-explainer" aria-live="polite" aria-label="当前步骤说明">
+        <span className="canvas-step-kicker">当前步骤 · {currentStep?.operation ?? '等待开始'}</span>
+        <p>{stepDescription ?? '点击下一步，开始观察窗口如何扩张。'}</p>
+      </section>
+      <svg
+        ref={svgRef}
+        width={Math.max(dimensions.width, s.length * 26 + 24)}
+        height={Math.max(dimensions.height, 600)}
         className="algorithm-canvas"
       />
       <div className="canvas-hint">

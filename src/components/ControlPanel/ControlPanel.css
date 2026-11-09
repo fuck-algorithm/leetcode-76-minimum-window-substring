@@ -9,19 +9,6 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.step-description {
-  flex: 0 0 200px;
-  width: 200px;
-  font-size: 11px;
-  color: #e0e0e0;
-  background: rgba(31, 41, 55, 0.6);
-  border-radius: 4px;
-  padding: 0.2rem 0.5rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.4;
-}
 
 .control-row {
   display: flex;
@@ -228,8 +215,8 @@
 }
 
 @media (max-width: 768px) {
-  .step-description {
-    display: none;
+  .control-row {
+    flex-wrap: wrap;
   }
 
   .control-buttons {

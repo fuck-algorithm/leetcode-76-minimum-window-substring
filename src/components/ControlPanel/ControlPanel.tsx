@@ -5,7 +5,6 @@ import './ControlPanel.css';
 interface ControlPanelProps {
   currentStep: number;
   totalSteps: number;
-  stepDescription?: string;
   isPlaying: boolean;
   onPlay: () => void;
   onPause: () => void;
@@ -20,7 +19,6 @@ interface ControlPanelProps {
 const ControlPanel: React.FC<ControlPanelProps> = ({
   currentStep,
   totalSteps,
-  stepDescription,
   isPlaying,
   onPlay,
   onPause,
@@ -88,12 +86,6 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   return (
     <div className="control-panel">
       <div className="control-row">
-        {stepDescription && (
-          <div className="step-description" title={stepDescription}>
-            {stepDescription}
-          </div>
-        )}
-
         <div className="control-buttons">
           <button className="control-btn" onClick={onReset} title="重置 (R)">
             <span className="btn-icon">↺</span>

@@ -217,68 +217,92 @@ const golangCode = `func minWindow(s string, t string) string {
 // 步骤类型到"当前执行行"（单行）的映射 —— Debug 高亮这一行
 // 行号已逐一对照源码字符串逐行核对（语义核心行），与源码实际内容一致。
 const jsStepToActiveLine: Record<string, number> = {
-  init: 1,       // function minWindow(s, t) {
-  expand: 16,    // const c = s[right];
-  found: 30,     // if (right - left < minLen) {
-  shrink: 36,    // const d = s[left];
-  complete: 48,  // return minLen === Infinity ? "" : s.substring(start, start + minLen);
+  init: 2,
+  read: 16,
+  skip: 20,
+  expand: 21,
+  compare: 50,
+  found: 51,
+  shrink: 63,
+  complete: 68,
 };
 
 const pyStepToActiveLine: Record<string, number> = {
-  init: 1,       // def minWindow(s: str, t: str) -> str:
-  expand: 17,    // c = s[right]
-  found: 29,     // if right - left < min_len:
-  shrink: 34,    // d = s[left]
-  complete: 42,  // return "" if min_len == float('inf') else s[start:start + min_len]
+  init: 4,
+  read: 17,
+  skip: 21,
+  expand: 22,
+  compare: 99,
+  found: 100,
+  shrink: 110,
+  complete: 42,
 };
 
 const javaStepToActiveLine: Record<string, number> = {
-  init: 1,       // public String minWindow(String s, String t) {
-  expand: 16,    // char c = s.charAt(right);
-  found: 30,     // if (right - left < minLen) {
-  shrink: 36,    // char d = s.charAt(left);
-  complete: 48,  // return minLen == Integer.MAX_VALUE ? "" : s.substring(start, start + minLen);
+  init: 2,
+  read: 16,
+  skip: 20,
+  expand: 21,
+  compare: 143,
+  found: 144,
+  shrink: 156,
+  complete: 48,
 };
 
 const goStepToActiveLine: Record<string, number> = {
-  init: 1,       // func minWindow(s string, t string) string {
-  expand: 16,    // c := s[right]
-  found: 30,     // if right-left < minLen {
-  shrink: 36,    // d := s[left]
-  complete: 51,  // return s[start : start+minLen]
+  init: 2,
+  read: 16,
+  skip: 20,
+  expand: 21,
+  compare: 193,
+  found: 194,
+  shrink: 206,
+  complete: 51,
 };
 
 // 步骤类型到"相关代码行区间"的映射 —— 淡色提示整段（保留原多行映射）
 const jsStepToRelatedLines: Record<string, number[]> = {
-  init: [1, 2, 3, 5, 6, 7, 9, 10, 11],
-  expand: [13, 14, 15, 16, 18, 19, 20, 21, 22, 23],
-  found: [27, 28, 29, 30],
-  shrink: [33, 34, 35, 37, 38, 39, 40, 41],
-  complete: [48],
+  init: [2, 3, 4, 5, 6, 7, 9, 10, 11, 12],
+  read: [14, 15, 16, 17],
+  skip: [14, 15, 16, 17, 18, 19, 20],
+  expand: [20, 21, 22, 23, 24, 25, 26],
+  compare: [48, 49, 50],
+  found: [50, 51, 52],
+  shrink: [55, 56, 57, 59, 60, 61, 62, 63, 64],
+  complete: [68],
 };
 
 const pyStepToRelatedLines: Record<string, number[]> = {
-  init: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-  expand: [12, 13, 14, 15, 17, 18, 19, 20],
-  found: [24, 25, 26],
-  shrink: [29, 30, 31, 33, 34, 35, 36],
-  complete: [42],
+  init: [74, 75, 77, 78, 79, 81, 82, 83],
+  read: [15, 16, 17, 18],
+  skip: [15, 16, 17, 18, 19, 20, 21],
+  expand: [21, 22, 23, 24, 25, 26],
+  compare: [97, 98, 99],
+  found: [99, 100, 101],
+  shrink: [103, 104, 105, 107, 108, 109, 110],
+  complete: [112],
 };
 
 const javaStepToRelatedLines: Record<string, number[]> = {
-  init: [1, 2, 3, 5, 6, 7, 9, 10, 11],
-  expand: [13, 14, 15, 16, 18, 19, 20, 21, 22],
-  found: [26, 27, 28, 29],
-  shrink: [32, 33, 34, 36, 37, 38, 39, 40],
-  complete: [48],
+  init: [115, 116, 118, 119, 120, 123, 124, 125],
+  read: [14, 15, 16, 17],
+  skip: [14, 15, 16, 17, 18, 19, 20],
+  expand: [20, 21, 22, 23, 24, 25, 26],
+  compare: [141, 142, 143],
+  found: [143, 144, 145],
+  shrink: [148, 149, 150, 152, 153, 154, 155, 156],
+  complete: [161],
 };
 
 const goStepToRelatedLines: Record<string, number[]> = {
-  init: [1, 2, 3, 5, 6, 7, 9, 10, 11],
-  expand: [13, 14, 15, 16, 18, 19, 20, 21, 22],
-  found: [26, 27, 28, 29],
-  shrink: [32, 33, 34, 36, 37, 38, 39, 40],
-  complete: [49, 50, 51],
+  init: [165, 166, 168, 169, 170, 173, 174, 175],
+  read: [14, 15, 16, 17],
+  skip: [14, 15, 16, 17, 18, 19, 20],
+  expand: [20, 21, 22, 23, 24, 25],
+  compare: [191, 192, 193],
+  found: [193, 194, 195],
+  shrink: [198, 199, 200, 202, 203, 204, 205, 206],
+  complete: [211, 212, 214],
 };
 
 const parseCodeLines = (code: string): CodeLine[] => {

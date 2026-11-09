@@ -18,8 +18,12 @@ const HelpPanel: React.FC<HelpPanelProps> = ({ onClose }) => {
           <section className="help-section">
             <h3>🎯 算法说明</h3>
             <p>
-              <strong>滑动窗口算法</strong>是一种高效的字符串处理技巧。通过维护一个窗口在字符串上滑动，
-              我们可以在 <code>O(m+n)</code> 时间复杂度内解决问题。
+              <strong>窗口使用左闭右开区间 [L, R)</strong>：L 指向第一个纳入字符，R 指向下一个不纳入的位置，
+              所以窗口长度是 R − L。valid 是“已达标的不同字符种类数”；只有某字符频次从不足跨到需求值时才增加。
+            </p>
+            <p>
+              先移动 R 扩大窗口；valid 达到 need 的种类数后，记录并比较候选答案，再移动 L 移除字符，
+              直到某个需求再次不足。整体时间复杂度为 <code>O(m+n)</code>。
             </p>
             <div className="help-complexity">
               <div>⏱ <strong>时间复杂度：</strong>O(m + n)</div>
@@ -96,7 +100,7 @@ const HelpPanel: React.FC<HelpPanelProps> = ({ onClose }) => {
               </div>
               <div className="help-color-item">
                 <span className="help-color-box" style={{background: '#10b981'}}></span>
-                <span><strong>R 标记：</strong>右指针位置（窗口结束）</span>
+                <span><strong>R 标记：</strong>窗口右边界（不含该格）；窗口是 [L, R)，长度 = R − L</span>
               </div>
             </div>
           </section>

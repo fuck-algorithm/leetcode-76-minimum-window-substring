@@ -14,9 +14,12 @@ interface CodePanelProps {
 }
 
 const STEP_LABELS: Record<string, string> = {
-  init: '初始化',
-  expand: '扩张窗口',
-  found: '找到覆盖',
+  init: '初始化需求',
+  read: '读取右端字符',
+  skip: '跳过非目标字符',
+  expand: '更新窗口频次',
+  compare: '比较候选窗口',
+  found: '记录最短答案',
   shrink: '收缩窗口',
   complete: '完成',
 };

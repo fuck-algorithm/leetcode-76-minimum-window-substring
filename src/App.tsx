@@ -12,10 +12,10 @@ import WeChatFloat from './components/WeChatFloat/WeChatFloat';
 import './App.css';
 
 const App: React.FC = () => {
-  const [s, setS] = useState('ADOBECODEBANC');
-  const [t, setT] = useState('ABC');
-  const [inputS, setInputS] = useState('ADOBECODEBANC');
-  const [inputT, setInputT] = useState('ABC');
+  const [s, setS] = useState('AAABC');
+  const [t, setT] = useState('AABC');
+  const [inputS, setInputS] = useState('AAABC');
+  const [inputT, setInputT] = useState('AABC');
   const [inputError, setInputError] = useState('');
   
   const [steps, setSteps] = useState<AlgorithmStep[]>([]);
@@ -196,7 +196,12 @@ const App: React.FC = () => {
 
           <div className="main-content">
             <div className="left-panel">
-              <Canvas s={s} t={t} currentStep={currentStepData} />
+              <Canvas
+                s={s}
+                t={t}
+                currentStep={currentStepData}
+                stepDescription={currentStepData?.narration ?? currentStepData?.description}
+              />
             </div>
 
             <div className="right-panel">
@@ -207,7 +212,6 @@ const App: React.FC = () => {
           <ControlPanel
             currentStep={currentStep}
             totalSteps={steps.length}
-            stepDescription={currentStepData?.description}
             isPlaying={isPlaying}
             onPlay={() => setIsPlaying(true)}
             onPause={() => setIsPlaying(false)}

@@ -3,13 +3,47 @@
   background: #111827;
   border-radius: 6px;
   position: relative;
-  overflow: hidden;
-  min-height: 280px;
+  overflow: auto;
+  min-height: 0;
+}
+
+.canvas-step-explainer {
+  position: absolute;
+  z-index: 3;
+  top: 10px;
+  left: 12px;
+  width: min(300px, calc(100% - 24px));
+  padding: 8px 10px;
+  border: 1px solid rgba(96, 165, 250, 0.55);
+  border-left: 3px solid #60a5fa;
+  border-radius: 7px;
+  background: rgba(17, 24, 39, 0.96);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+  pointer-events: none;
+}
+
+.canvas-step-kicker {
+  display: block;
+  margin-bottom: 4px;
+  color: #93c5fd;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.canvas-step-explainer p {
+  margin: 0;
+  color: #f3f4f6;
+  font-size: 11px;
+  line-height: 1.45;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .algorithm-canvas {
   display: block;
   cursor: grab;
+  max-width: 100%;
 }
 
 .algorithm-canvas:active {
@@ -44,5 +78,20 @@
 @media (max-width: 768px) {
   .canvas-container {
     min-height: 240px;
+  }
+
+  .left-panel {
+    min-height: 300px;
+  }
+
+  .canvas-step-explainer {
+    top: 6px;
+    left: 6px;
+    width: min(220px, calc(100% - 12px));
+    padding: 6px 8px;
+  }
+
+  .canvas-step-explainer p {
+    font-size: 10px;
   }
 }
